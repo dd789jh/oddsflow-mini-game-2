@@ -3,6 +3,19 @@ import { AnimatePresence, motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import { Volume2, VolumeX, Info, Trophy } from 'lucide-react'
 
+// Telegram WebApp TypeScript declaration
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: {
+        expand: () => void
+        ready: () => void
+        [key: string]: any
+      }
+    }
+  }
+}
+
 type Lang = 'en' | 'zh'
 type GameState = 'BETTING' | 'LOCKED' | 'RESULT'
 type BetType = 'home' | 'draw' | 'away'
@@ -1965,6 +1978,16 @@ function App() {
   const [walletPulse, setWalletPulse] = useState(false)
 
   const t = translations[lang]
+
+  // Telegram WebApp - Force fullscreen and ready state
+  useEffect(() => {
+    if (window.Telegram?.WebApp) {
+      // Force expand to fullscreen
+      window.Telegram.WebApp.expand()
+      // Notify Telegram that the app is ready
+      window.Telegram.WebApp.ready()
+    }
+  }, [])
 
   const bgmRef = useRef<HTMLAudioElement | null>(null)
   const clickRef = useRef<HTMLAudioElement | null>(null)
