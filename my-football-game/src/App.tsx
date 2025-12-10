@@ -1,9 +1,8 @@
-import { useMemo, useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import { Volume2, VolumeX, Info, Trophy } from 'lucide-react'
 
-type Team = 'home' | 'away'
 type Lang = 'en' | 'zh'
 type GameState = 'BETTING' | 'LOCKED' | 'RESULT'
 type BetType = 'home' | 'draw' | 'away'
@@ -166,27 +165,6 @@ const translations = {
   },
 } as const
 
-const ScoreButton = ({
-  label,
-  onClick,
-  onPlayClick,
-}: {
-  label: string
-  onClick: () => void
-  onPlayClick: () => void
-}) => (
-  <motion.button
-    whileTap={{ scale: 0.9 }}
-    onClick={() => {
-      onPlayClick()
-      onClick()
-    }}
-    className="h-14 w-14 rounded-full bg-gradient-to-br from-cyan-400/70 to-blue-600/80 text-2xl font-black text-slate-950 shadow-[0_0_25px_rgba(59,130,246,0.6)] ring-2 ring-cyan-300/60 backdrop-blur focus:outline-none"
-  >
-    {label}
-  </motion.button>
-)
-
 const Modal = ({
   show,
   onClose,
@@ -246,101 +224,6 @@ const Modal = ({
   </AnimatePresence>
 )
 
-const PurchaseSignalModal = ({
-  show,
-  onClose,
-  coins,
-  onPurchase,
-  onGetCoins,
-}: {
-  show: boolean
-  onClose: () => void
-  coins: number
-  onPurchase: () => void
-  onGetCoins: () => void
-}) => {
-  const price = 500
-  const canAfford = coins >= price
-
-  return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-            className="relative w-[90%] max-w-md rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
-            <div className="relative space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 shadow-[0_0_25px_rgba(251,191,36,0.7)]" />
-                <p className="text-lg font-bold text-white">Unlock High-Confidence Signal</p>
-              </div>
-              <div className="space-y-3">
-                <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 p-3">
-                  <p className="text-sm text-slate-300">
-                    Price: <span className="text-amber-400 font-bold">500 Coins</span>
-                  </p>
-                  <p className="text-sm text-slate-300 mt-1">
-                    Your Balance: <span className="text-white font-bold">{coins.toLocaleString()} Coins</span>
-                  </p>
-                </div>
-                {!canAfford && (
-                  <div className="rounded-lg border border-red-400/30 bg-red-400/10 p-3">
-                    <p className="text-sm text-red-300 font-semibold">Insufficient Coins</p>
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-3">
-                {canAfford ? (
-                  <motion.button
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      onPurchase()
-                      onClose()
-                    }}
-                    className="flex-1 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 px-4 py-3 text-base font-semibold text-slate-900 shadow-[0_0_20px_rgba(251,191,36,0.4)]"
-                  >
-                    Unlock Now
-                  </motion.button>
-                ) : (
-                  <motion.button
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      onGetCoins()
-                      onClose()
-                    }}
-                    className="flex-1 rounded-2xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 px-4 py-3 text-base font-semibold text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]"
-                  >
-                    Get Free Coins
-                  </motion.button>
-                )}
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={onClose}
-                  className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-base font-semibold text-white"
-                >
-                  Cancel
-                </motion.button>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  )
-}
-
 const RulesModal = ({
   show,
   onClose,
@@ -348,7 +231,7 @@ const RulesModal = ({
 }: {
   show: boolean
   onClose: () => void
-  t: typeof translations.en
+  t: typeof translations.en | typeof translations.zh
 }) => (
   <AnimatePresence>
     {show && (
@@ -455,7 +338,7 @@ const LeaderboardModal = ({
 }: {
   show: boolean
   onClose: () => void
-  t: typeof translations.en
+  t: typeof translations.en | typeof translations.zh
 }) => {
   const leaders = [
     { rank: 1, name: 'Alex_Crypto', wins: 12, medal: '🥇', color: 'from-yellow-400 to-amber-500' },
@@ -533,8 +416,8 @@ const LiveCommentary = ({
 }: { 
   text: string
   isMuted: boolean
-  goalRef: React.RefObject<HTMLAudioElement>
-  crowdGaspRef: React.RefObject<HTMLAudioElement>
+  goalRef: React.RefObject<HTMLAudioElement | null>
+  crowdGaspRef: React.RefObject<HTMLAudioElement | null>
 }) => {
   // Audio trigger logic with debugging
   useEffect(() => {
@@ -648,8 +531,8 @@ const HolographicStadium = ({
   currentMatch: Match
   commentary: string
   isMuted: boolean
-  goalRef: React.RefObject<HTMLAudioElement>
-  crowdGaspRef: React.RefObject<HTMLAudioElement>
+  goalRef: React.RefObject<HTMLAudioElement | null>
+  crowdGaspRef: React.RefObject<HTMLAudioElement | null>
   liveScore: { home: number; away: number }
 }) => {
   return (
@@ -809,17 +692,9 @@ const HolographicStadium = ({
 const ShareSlipModal = ({
   show,
   onClose,
-  teamName,
-  betAmount,
-  betType,
-  t,
 }: {
   show: boolean
   onClose: () => void
-  teamName: string
-  betAmount: number
-  betType: BetType
-  t: typeof translations.en
 }) => {
   // Randomly choose between two revolutionary share messages
   const shareMessages = [
@@ -1133,7 +1008,6 @@ const ResultAnalysisModal = ({
   onClose,
   roundResult,
   currentMatch,
-  t,
   onClaim,
   winRef,
   isMuted,
@@ -1142,7 +1016,6 @@ const ResultAnalysisModal = ({
   onClose: () => void
   roundResult: { isWin: boolean; profit: number; result: string; userPick: string; matchScore: string } | null
   currentMatch: Match
-  t: typeof translations.en
   onClaim?: () => void
   winRef?: React.RefObject<HTMLAudioElement>
   isMuted?: boolean
@@ -1152,7 +1025,7 @@ const ResultAnalysisModal = ({
     return null
   }
 
-  const { isWin, profit, result, userPick, matchScore } = roundResult
+  const { isWin, profit, result } = roundResult
 
   return (
     <AnimatePresence>
@@ -2063,9 +1936,10 @@ function App() {
   const [betResult, setBetResult] = useState<'win' | 'lose' | null>(null)
   const [showBigWin, setShowBigWin] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
-  const [winStreak, setWinStreak] = useState(0)
-  const [lossStreak, setLossStreak] = useState(0)
   const [showStreakEffect, setShowStreakEffect] = useState<'fire' | 'ice' | null>(null)
+  // Streak counters (used internally for effect triggers)
+  const [, setWinStreakCount] = useState(0)
+  const [, setLossStreakCount] = useState(0)
   const [showTruthModal, setShowTruthModal] = useState(false)
   const [truthMessage, setTruthMessage] = useState<{ en: string; zh: string } | null>(null)
   const [showSplash, setShowSplash] = useState(true)
@@ -2087,9 +1961,7 @@ function App() {
   const [floatingTexts, setFloatingTexts] = useState<Array<{ id: number; text: string; x: number; y: number }>>([])
   // Fan Energy for Smash to Boost
   const [fanEnergy, setFanEnergy] = useState(0)
-  // Manual claim state
-  const [coinsClaimed, setCoinsClaimed] = useState(false)
-  // Wallet icon animation state
+  // Wallet icon animation state (used for claim animation)
   const [walletPulse, setWalletPulse] = useState(false)
 
   const t = translations[lang]
@@ -2447,9 +2319,9 @@ function App() {
               setShowBigWin(true)
               
               // Update win streak
-              setWinStreak((prev) => {
+              setWinStreakCount((prev) => {
                 const newStreak = prev + 1
-                setLossStreak(0) // Reset loss streak
+                setLossStreakCount(0) // Reset loss streak
                 // Trigger fire effect if 3+ wins
                 if (newStreak >= 3) {
                   setShowStreakEffect('fire')
@@ -2491,9 +2363,9 @@ function App() {
               setShowWinModal(true) // Show modal even on loss
               
               // Update loss streak
-              setLossStreak((prev) => {
+              setLossStreakCount((prev) => {
                 const newStreak = prev + 1
-                setWinStreak(0) // Reset win streak
+                setWinStreakCount(0) // Reset win streak
                 // Trigger ice effect if 3+ losses
                 if (newStreak >= 3) {
                   setShowStreakEffect('ice')
@@ -2538,7 +2410,6 @@ function App() {
           setLiveScore({ home: 0, away: 0 }) // Reset live score
           setShowGoalFlash(false) // Reset goal flash
           setFanEnergy(0) // Reset fan energy
-          setCoinsClaimed(false) // Reset claim state
           return TOTAL_CYCLE
         }
 
@@ -2794,10 +2665,14 @@ function App() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-100 shadow-[0_0_15px_rgba(251,191,36,0.45)]">
+            <motion.div
+              animate={walletPulse ? { scale: [1, 1.5, 1] } : {}}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+              className="flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-100 shadow-[0_0_15px_rgba(251,191,36,0.45)]"
+            >
               <span className="text-lg">🪙</span>
               <span className="text-white font-bold">{coins.toLocaleString()}</span>
-            </div>
+            </motion.div>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={toggleLang}
@@ -2881,7 +2756,7 @@ function App() {
                 <div className="flex items-center gap-2 text-amber-300">
                   <span>🎉</span>
                   <span className="font-semibold text-sm md:text-base">
-                    {t.win} +{roundResult.profit} {t.coins}
+                    WIN! +{roundResult.profit} {t.coins}
                   </span>
                 </div>
               )}
@@ -3092,7 +2967,6 @@ function App() {
         onClose={handleResultModalClose}
         roundResult={roundResult}
         currentMatch={currentMatch}
-        t={t}
         onClaim={() => {
           // Trigger wallet icon animation
           setWalletPulse(true)
@@ -3104,10 +2978,6 @@ function App() {
         <ShareSlipModal
           show={showShareModal}
           onClose={() => setShowShareModal(false)}
-          teamName={userBet.type === 'home' ? currentMatch.home : userBet.type === 'away' ? currentMatch.away : 'Draw'}
-          betAmount={userBet.amount}
-          betType={userBet.type}
-          t={t}
         />
       )}
 
@@ -3193,59 +3063,5 @@ function App() {
     </div>
   )
 }
-
-const TeamCard = ({
-  name,
-  score,
-  onIncrement,
-  onDecrement,
-  onPlayClick,
-  t,
-}: {
-  name: string
-  score: number
-  onIncrement: () => void
-  onDecrement: () => void
-  onPlayClick: () => void
-  t: typeof translations.en
-}) => (
-  <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-white/10 p-4 shadow-[0_0_22px_rgba(59,130,246,0.3)] backdrop-blur-2xl">
-    <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-blue-600/10" />
-    <div className="relative flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img
-            src={name === TEAMS.home ? '/Man Utd.webp' : '/Chelsea.png'}
-            alt={`${name} badge`}
-            className="h-12 w-12 rounded-full border-2 border-cyan-300/70 bg-white p-1 shadow-[0_0_18px_rgba(34,211,238,0.5)]"
-          />
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.28em] text-cyan-100/80">
-              {t.team}
-            </p>
-            <h2 className="text-xl font-bold text-white drop-shadow-[0_0_12px_rgba(59,130,246,0.5)]">
-              {name}
-            </h2>
-          </div>
-        </div>
-        <div className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-100">
-          {t.full_time}
-        </div>
-      </div>
-      <div className="flex items-center justify-between gap-5">
-        <ScoreButton label="-" onClick={onDecrement} onPlayClick={onPlayClick} />
-        <div className="flex-1 text-center">
-          <div className="font-mono text-8xl font-black leading-none text-white drop-shadow-[0_0_24px_rgba(14,165,233,0.7)]">
-            {score}
-          </div>
-          <p className="mt-2 text-xs uppercase tracking-[0.2em] text-slate-200/80">
-            {t.goals}
-          </p>
-        </div>
-        <ScoreButton label="+" onClick={onIncrement} onPlayClick={onPlayClick} />
-      </div>
-    </div>
-  </div>
-)
 
 export default App
