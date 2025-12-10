@@ -549,7 +549,7 @@ const HolographicStadium = ({
   liveScore: { home: number; away: number }
 }) => {
   return (
-    <div className="relative h-80 w-full overflow-hidden rounded-2xl">
+    <div className="relative h-full w-full overflow-hidden rounded-2xl">
       {/* Layer 1: Background - Holographic Pitch (Z-Index 0) */}
       <div className="absolute inset-0 z-0 border-2 border-cyan-400/60 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black shadow-[0_0_40px_rgba(6,182,212,0.4)]">
         {/* Grid Texture Overlay */}
@@ -1500,7 +1500,7 @@ const ActivityFeed = ({ matchHistory }: { matchHistory: Array<{ home: string; aw
   }, [])
 
   return (
-    <div className="relative h-64 overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
+    <div className="relative h-full overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
       {/* Top gradient mask */}
       <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-slate-900 via-slate-900/80 to-transparent z-10 pointer-events-none" />
       
@@ -2624,7 +2624,7 @@ function App() {
   }
 
   return (
-    <div className={`relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 ${
+    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 ${
       (timeLeft <= 3 && timeLeft > 0 && gameState === 'BETTING') || showGoalFlash
         ? 'animate-pulse border-4 border-red-500/50' 
         : ''
@@ -2646,9 +2646,9 @@ function App() {
         />
       </div>
 
-      <div className="relative mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8">
-        {/* Top bar */}
-        <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
+      <div className="relative mx-auto flex max-w-5xl flex-1 flex-col min-h-0 gap-2 px-4 py-2 overflow-hidden">
+        {/* Top bar - Fixed Header */}
+        <div className="flex-none flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-2 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
           <div className="flex items-center gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -2717,8 +2717,8 @@ function App() {
           </div>
         </div>
 
-        {/* Countdown Timer */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
+        {/* Countdown Timer - Fixed */}
+        <div className="flex-none rounded-2xl border border-white/10 bg-white/5 px-4 py-2 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs uppercase tracking-[0.2em] text-cyan-400">
               {gameState === 'BETTING' ? 'BETTING OPEN' : gameState === 'LOCKED' ? 'MATCH IN PROGRESS' : 'RESULT'}
@@ -2747,21 +2747,23 @@ function App() {
           </div>
         </div>
 
-        {/* Immersive Holographic Stadium with Layered Layout */}
-        <HolographicStadium
-          gameState={gameState}
-          matchResult={matchResult}
-          currentMatch={currentMatch}
-          commentary={commentary}
-          isMuted={isMuted}
-          goalRef={goalRef}
-          crowdGaspRef={crowdGaspRef}
-          liveScore={liveScore}
-        />
+        {/* Immersive Holographic Stadium with Layered Layout - Responsive Height */}
+        <div className="shrink-0 h-[30vh] sm:h-[35vh] md:h-80">
+          <HolographicStadium
+            gameState={gameState}
+            matchResult={matchResult}
+            currentMatch={currentMatch}
+            commentary={commentary}
+            isMuted={isMuted}
+            goalRef={goalRef}
+            crowdGaspRef={crowdGaspRef}
+            liveScore={liveScore}
+          />
+        </div>
 
-        {/* Active Bet Indicator */}
+        {/* Active Bet Indicator - Fixed */}
         {userBet.type !== null && (
-          <div className="flex items-center gap-3">
+          <div className="flex-none flex items-center gap-2">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2807,9 +2809,9 @@ function App() {
           </div>
         )}
 
-        {/* Betting Buttons */}
+        {/* Betting Buttons - Fixed */}
         {gameState === 'BETTING' ? (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="flex-none grid grid-cols-3 gap-2">
             <motion.button
               whileTap={{ scale: 0.9 }}
               animate={coins >= 100 && userBet.type === null ? {
@@ -2934,43 +2936,52 @@ function App() {
             </motion.button>
           </div>
         ) : gameState === 'LOCKED' ? (
-          <SmashToBoost
-            onSmash={() => {
-              setFanEnergy((prev) => prev + 1)
-            }}
-            fanEnergy={fanEnergy}
-            isMuted={isMuted}
-          />
+          <div className="flex-none">
+            <SmashToBoost
+              onSmash={() => {
+                setFanEnergy((prev) => prev + 1)
+              }}
+              fanEnergy={fanEnergy}
+              isMuted={isMuted}
+            />
+          </div>
         ) : (
-          <div className="rounded-2xl border border-white/20 bg-white/5 p-6 text-center backdrop-blur-xl">
+          <div className="flex-none rounded-2xl border border-white/20 bg-white/5 p-4 text-center backdrop-blur-xl">
             <p className="text-sm text-slate-400">Match finished. Next round starting...</p>
           </div>
         )}
 
-        {/* Intel Board - Show after betting */}
+        {/* Intel Board - Show after betting - Fixed */}
         {userBet.type !== null && intelType && gameState !== 'RESULT' && (
-          <AnimatePresence mode="wait">
-            <IntelBoard
-              key={intelType}
-              type={intelType}
-              userBet={userBet}
-              currentMatch={currentMatch}
-              onInviteClick={() => {
-                setShowShareModal(true)
-              }}
-              onChannelClick={() => {
-                window.open('https://t.me/your_channel', '_blank')
-              }}
-            />
-          </AnimatePresence>
+          <div className="flex-none">
+            <AnimatePresence mode="wait">
+              <IntelBoard
+                key={intelType}
+                type={intelType}
+                userBet={userBet}
+                currentMatch={currentMatch}
+                onInviteClick={() => {
+                  setShowShareModal(true)
+                }}
+                onChannelClick={() => {
+                  window.open('https://t.me/your_channel', '_blank')
+                }}
+              />
+            </AnimatePresence>
+          </div>
         )}
 
-        {/* Live Activity Feed */}
-        <ActivityFeed matchHistory={matchHistory} />
-        
-        {/* Community Jackpot */}
-        <div className="mt-4">
-          <CommunityJackpot />
+        {/* Scrollable Content Area - Takes remaining space */}
+        <div className="flex-1 min-h-0 flex flex-col gap-2 overflow-hidden">
+          {/* Live Activity Feed - Scrollable */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <ActivityFeed matchHistory={matchHistory} />
+          </div>
+          
+          {/* Community Jackpot - Fixed at bottom */}
+          <div className="flex-none">
+            <CommunityJackpot />
+          </div>
         </div>
       </div>
 
