@@ -589,6 +589,13 @@ const HolographicStadium = ({
   crowdGaspRef: React.RefObject<HTMLAudioElement | null>
   liveScore: { home: number; away: number }
 }) => {
+  const statusLabel =
+    gameState === 'RESULT'
+      ? 'Match Finished'
+      : gameState === 'BETTING'
+      ? 'Match Starting'
+      : null
+
   return (
     <div className="relative h-full w-full overflow-hidden rounded-2xl">
       {/* Layer 1: Background - Holographic Pitch (Z-Index 0) */}
@@ -738,6 +745,14 @@ const HolographicStadium = ({
           </div>
         </div>
       </div>
+
+      {statusLabel && (
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md shadow-[0_0_20px_rgba(0,0,0,0.35)]">
+            <span>{statusLabel}</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1418,7 +1433,7 @@ const TapToStartOverlay = ({
             className="text-center"
           >
             <motion.div
-              className="inline-flex flex-col bg-cyan-500/20 border-2 border-cyan-400 px-8 py-4 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.5)] gap-4"
+              className="inline-flex flex-col items-center gap-4 bg-cyan-500/20 border-2 border-cyan-400 px-8 py-4 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.5)]"
               animate={{ 
                 opacity: [0.7, 1, 0.7],
                 scale: [1, 1.05, 1],
@@ -1571,15 +1586,15 @@ const ActivityFeed = ({ matchHistory }: { matchHistory: Array<{ home: string; aw
   }, [])
 
   return (
-    <div className="relative h-full overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
+    <div className="relative h-full overflow-y-auto rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
       {/* Top gradient mask */}
       <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-slate-900 via-slate-900/80 to-transparent z-10 pointer-events-none" />
       
       {/* Bottom gradient mask */}
       <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent z-10 pointer-events-none" />
       
-      <div className="h-full overflow-hidden">
-        <div className="py-2">
+      <div className="h-full overflow-y-auto">
+        <div className="py-1">
           <AnimatePresence mode="popLayout">
             {activities.map((activity) => (
               <motion.div
@@ -1588,9 +1603,9 @@ const ActivityFeed = ({ matchHistory }: { matchHistory: Array<{ home: string; aw
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -20, scale: 0.95 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="px-4 py-3"
+                className="px-3 py-1.5"
               >
-                <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-base text-slate-300 backdrop-blur-md shadow-[0_0_20px_rgba(59,130,246,0.2)] hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] transition-shadow">
+                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.2)] hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-shadow">
                   {activity.type === 'match' ? (
                     <span className="text-amber-300 font-semibold">⚽ {activity.text}</span>
                   ) : activity.type === 'vip' ? (
@@ -1839,11 +1854,11 @@ const IntelBoard = ({
         <p className="text-sm font-bold text-blue-300">AI MODEL ALERT</p>
       </div>
       
-      <div className="rounded-lg border border-white/10 bg-black/40 p-2 mb-3 font-mono text-[10px] text-green-400 overflow-hidden">
+      <div className="rounded-lg border border-white/10 bg-black/40 p-3 mb-3 font-mono text-[10px] text-green-400 h-auto min-h-[3rem] whitespace-normal break-words">
         <motion.div
           animate={{ x: [0, -100, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-          className="whitespace-nowrap"
+          className="whitespace-normal break-words"
         >
           {'> AI Model detected a significant odds divergence...'.repeat(3)}
         </motion.div>
@@ -2697,7 +2712,7 @@ function App() {
   }
 
   return (
-    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 pt-4 pb-8 ${
+    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 pt-4 pb-10 max-w-md mx-auto px-4 ${
       (timeLeft <= 3 && timeLeft > 0 && gameState === 'BETTING') || showGoalFlash
         ? 'animate-pulse border-4 border-red-500/50' 
         : ''
@@ -2719,7 +2734,7 @@ function App() {
         />
       </div>
 
-      <div className="relative mx-auto flex max-w-5xl flex-1 flex-col min-h-0 gap-1.5 px-3 py-1 overflow-hidden">
+      <div className="relative mx-auto flex max-w-5xl flex-1 flex-col min-h-0 gap-1.5 py-1 overflow-hidden">
         {/* Top bar - Fixed Header */}
         <div className="flex-none flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
           <div className="flex items-center gap-3">
@@ -3046,8 +3061,8 @@ function App() {
 
         {/* Scrollable Content Area - Takes remaining space */}
         <div className="flex-1 min-h-0 flex flex-col gap-2 overflow-hidden">
-          {/* Live Activity Feed - Scrollable */}
-          <div className="flex-1 min-h-0 overflow-y-auto">
+          {/* Live Activity Feed - Scrollable & Compact */}
+          <div className="h-32 min-h-0 overflow-hidden">
             <ActivityFeed matchHistory={matchHistory} />
           </div>
           
