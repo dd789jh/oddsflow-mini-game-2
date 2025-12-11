@@ -3102,10 +3102,3 @@ function App() {
 }
 
 export default App
-useEffect(() => {
-  // 强制 Telegram 展开全屏
-  if (window.Telegram?.WebApp) {
-    window.Telegram.WebApp.expand();
-    window.Telegram.WebApp.ready();
-  }
-}, []);
