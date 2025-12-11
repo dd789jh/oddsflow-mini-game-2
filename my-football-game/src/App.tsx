@@ -8,7 +8,8 @@
  * CREATE TABLE users (
  *   telegram_id BIGINT UNIQUE,
  *   coins BIGINT DEFAULT 1000 NOT NULL,
- *   first_name TEXT
+ *   first_name TEXT,
+ *   invited_by BIGINT
  * );
  * 
  * -- Optional: Create an index for faster lookups
@@ -2091,12 +2092,20 @@ function App() {
       try {
         let telegramUserId: number | null = null
         let telegramFirstName: string | null = null
+        let inviterId: number | null = null
 
         // Detect Telegram user
         if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
           const tgUser = window.Telegram.WebApp.initDataUnsafe.user
           telegramUserId = tgUser.id
           telegramFirstName = tgUser.first_name || null
+
+          // Referral: read inviter id from start_param (Telegram passes it via initDataUnsafe.start_param)
+          const startParam = window.Telegram.WebApp.initDataUnsafe?.start_param
+          if (typeof startParam === 'string' && /^\d+$/.test(startParam)) {
+            inviterId = Number(startParam)
+            if (Number.isNaN(inviterId)) inviterId = null
+          }
         } else {
           // Fallback for local development (non-Telegram environment)
           // IMPORTANT: Use a per-browser stable id to avoid "everyone shares the same wallet" during dev.
@@ -2137,17 +2146,32 @@ function App() {
         if (existingUser) {
           // Existing user: load their data
           console.log('✅ Existing user found:', existingUser)
-          setCoins(existingUser.coins || 1000)
+          setCoins(Number(existingUser.coins) || 1000)
           // Prefer DB name if present, otherwise keep Telegram-provided fallback
           setFirstName(existingUser.first_name || telegramFirstName)
         } else {
           // New user: create record
           console.log('🆕 Creating new user...')
+
+          // Referral rules:
+          // - If user opens app with start_param (inviter id) AND this is a new user insert:
+          //   - Set invited_by = inviterId
+          //   - New user initial coins = 2000 (otherwise 1000)
+          //   - Reward inviter +500 coins
+          const hasValidInviter =
+            typeof inviterId === 'number' &&
+            !Number.isNaN(inviterId) &&
+            inviterId > 0 &&
+            inviterId !== telegramUserId
+          const initialCoins = hasValidInviter ? 2000 : 1000
+
           const { data: newUser, error: insertError } = await supabase
             .from('users')
             .insert({
               telegram_id: telegramUserId,
               first_name: telegramFirstName,
+              coins: initialCoins,
+              invited_by: hasValidInviter ? inviterId : null,
             })
             .select()
             .single()
@@ -2155,11 +2179,40 @@ function App() {
           if (insertError) {
             console.error('❌ Error creating user:', insertError)
             // Fallback to default values
-            setCoins(1000)
+            setCoins(initialCoins)
           } else {
             console.log('✅ New user created:', newUser)
-            setCoins(newUser.coins || 1000)
+            setCoins(Number(newUser.coins) || initialCoins)
             setFirstName(newUser.first_name || telegramFirstName)
+
+            // Reward inviter (+500 coins) if applicable
+            if (hasValidInviter && inviterId) {
+              try {
+                const { data: inviter, error: inviterFetchError } = await supabase
+                  .from('users')
+                  .select('coins')
+                  .eq('telegram_id', inviterId)
+                  .single()
+
+                if (inviterFetchError) {
+                  console.error('❌ Error fetching inviter:', inviterFetchError)
+                } else {
+                  const inviterCoins = Number(inviter?.coins) || 0
+                  const { error: inviterUpdateError } = await supabase
+                    .from('users')
+                    .update({ coins: inviterCoins + 500 })
+                    .eq('telegram_id', inviterId)
+
+                  if (inviterUpdateError) {
+                    console.error('❌ Error rewarding inviter:', inviterUpdateError)
+                  } else {
+                    console.log('✅ Inviter rewarded +500 coins:', inviterId)
+                  }
+                }
+              } catch (e) {
+                console.error('❌ Unexpected error rewarding inviter:', e)
+              }
+            }
           }
         }
 
@@ -2760,6 +2813,28 @@ function App() {
     setLang((prev) => (prev === 'en' ? 'zh' : 'en'))
   }
 
+  const handleInviteShare = () => {
+    if (!userId) return
+
+    // Build Telegram share URL:
+    // https://t.me/share/url?url={App链接}?startapp={当前用户ID}&text=来猜球，送你2000金币！
+    //
+    // NOTE:
+    // - {App链接} ideally should be your bot Mini App link (e.g. https://t.me/<bot>?startapp=... or your WebApp URL).
+    // - We fallback to current page URL (without query/hash) for local/dev preview.
+    const baseAppUrl = `${window.location.origin}${window.location.pathname}`
+    const deepLink = `${baseAppUrl}?startapp=${userId}`
+    const text = '来猜球，送你2000金币！'
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(deepLink)}&text=${encodeURIComponent(text)}`
+
+    // Prefer Telegram native open method inside Mini App
+    if (window.Telegram?.WebApp?.openTelegramLink) {
+      window.Telegram.WebApp.openTelegramLink(shareUrl)
+    } else {
+      window.open(shareUrl, '_blank')
+    }
+  }
+
   const handlePlaceBet = async (type: BetType, event?: React.MouseEvent<HTMLButtonElement>) => {
     if (gameState !== 'BETTING') return
 
@@ -3044,6 +3119,16 @@ function App() {
             />
           </div>
         </div>
+
+        {/* Referral Invite Button */}
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={handleInviteShare}
+          disabled={!userId}
+          className="flex-none w-full rounded-xl bg-gradient-to-r from-emerald-400 via-green-500 to-emerald-600 px-3 py-2 text-sm font-black text-white shadow-[0_0_20px_rgba(34,197,94,0.45)] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          邀请好友 (+500💰)
+        </motion.button>
 
         {/* Immersive Holographic Stadium with Layered Layout - Responsive Height */}
         <div className="shrink-0 h-48 sm:h-[25vh] md:h-64">
