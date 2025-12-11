@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@supabase/supabase-js": "^2.87.1",
     "canvas-confetti": "^1.9.4",
     "classnames": "^2.5.1",
     "framer-motion": "^12.23.26",
