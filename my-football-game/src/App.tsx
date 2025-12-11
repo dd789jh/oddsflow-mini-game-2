@@ -228,10 +228,10 @@ const Modal = ({
           <div className="relative space-y-3">
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-[0_0_25px_rgba(99,102,241,0.7)]" />
-              <div>
+      <div>
                 <p className="text-base font-bold text-white">{title}</p>
                 <p className="text-xs text-slate-300">{description}</p>
-              </div>
+      </div>
             </div>
             <motion.button
               whileTap={{ scale: 0.96 }}
@@ -308,8 +308,8 @@ const RulesModal = ({
                     {t.step1_desc.split('**').map((part, i) => 
                       i % 2 === 1 ? <strong key={i} className="text-white font-semibold">{part}</strong> : part
                     )}
-                  </p>
-                </div>
+        </p>
+      </div>
               </div>
             </div>
 
@@ -1408,7 +1408,7 @@ const TapToStartOverlay = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/80 backdrop-blur-md cursor-pointer"
+          className="fixed inset-0 z-[9999] w-full h-full flex items-center justify-center bg-slate-900/80 backdrop-blur-md cursor-pointer"
           onClick={onTap}
         >
           <motion.div
@@ -1418,7 +1418,7 @@ const TapToStartOverlay = ({
             className="text-center"
           >
             <motion.div
-              className="inline-block bg-cyan-500/20 border-2 border-cyan-400 px-8 py-4 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.5)]"
+              className="inline-flex flex-col bg-cyan-500/20 border-2 border-cyan-400 px-8 py-4 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.5)] gap-4"
               animate={{ 
                 opacity: [0.7, 1, 0.7],
                 scale: [1, 1.05, 1],
@@ -1430,10 +1430,12 @@ const TapToStartOverlay = ({
               }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <p className="text-2xl md:text-3xl font-bold text-white mb-2">
+              <p className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
                 TAP ANYWHERE TO START GAME 🔊
               </p>
-              <p className="text-sm text-cyan-300/80">Click to unlock audio</p>
+              <p className="text-base text-cyan-400 animate-pulse drop-shadow-md">
+                Click to unlock audio
+              </p>
             </motion.div>
           </motion.div>
         </motion.div>
