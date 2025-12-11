@@ -193,24 +193,37 @@ const Modal = ({
   description: string
   actionLabel: string
   actionColor: 'blue' | 'green'
-}) => (
-  <AnimatePresence>
-    {show && (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md"
-        onClick={onClose}
-      >
+}) => {
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (show) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [show])
+
+  return (
+    <AnimatePresence>
+      {show && (
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-          className="relative w-[90%] max-w-md rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)]"
-          onClick={(e) => e.stopPropagation()}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={onClose}
         >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+            className="relative w-[90%] max-w-sm rounded-xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)]"
+            onClick={(e) => e.stopPropagation()}
+          >
           <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
           <div className="relative space-y-3">
             <div className="flex items-center gap-2.5">
@@ -236,7 +249,8 @@ const Modal = ({
       </motion.div>
     )}
   </AnimatePresence>
-)
+  )
+}
 
 const RulesModal = ({
   show,
@@ -246,24 +260,37 @@ const RulesModal = ({
   show: boolean
   onClose: () => void
   t: typeof translations.en | typeof translations.zh
-}) => (
-  <AnimatePresence>
-    {show && (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md"
-        onClick={onClose}
-      >
+}) => {
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (show) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [show])
+
+  return (
+    <AnimatePresence>
+      {show && (
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-          className="relative w-[90%] max-w-md rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl"
-          onClick={(e) => e.stopPropagation()}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={onClose}
         >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+            className="relative w-[90%] max-w-sm rounded-xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
           <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
           <div className="relative space-y-3">
             <div className="flex items-center gap-2.5">
@@ -343,7 +370,8 @@ const RulesModal = ({
       </motion.div>
     )}
   </AnimatePresence>
-)
+  )
+}
 
 const LeaderboardModal = ({
   show,
@@ -362,6 +390,18 @@ const LeaderboardModal = ({
     { rank: 5, name: 'Tom.eth', wins: 4, medal: '', color: '' },
   ]
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (show) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [show])
+
   return (
     <AnimatePresence>
       {show && (
@@ -369,7 +409,7 @@ const LeaderboardModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -377,30 +417,30 @@ const LeaderboardModal = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-            className="relative w-[90%] max-w-md rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl"
+            className="relative w-[90%] max-w-sm rounded-xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
-            <div className="relative space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 shadow-[0_0_25px_rgba(251,191,36,0.7)]" />
-                <p className="text-3xl font-bold text-white">{t.top_winners}</p>
+            <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
+            <div className="relative space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 shadow-[0_0_25px_rgba(251,191,36,0.7)]" />
+                <p className="text-xl font-bold text-white">{t.top_winners}</p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {leaders.map((leader) => (
                   <div
                     key={leader.rank}
-                    className={`flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4 ${
+                    className={`flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3 ${
                       leader.rank <= 3
                         ? `bg-gradient-to-r ${leader.color} text-white shadow-[0_0_20px_rgba(251,191,36,0.4)]`
                         : 'text-slate-300'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{leader.medal}</span>
-                      <span className="text-lg font-bold">{leader.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{leader.medal}</span>
+                      <span className="text-sm font-bold">{leader.name}</span>
                     </div>
-                    <div className="text-lg font-semibold">
+                    <div className="text-sm font-semibold">
                       {leader.wins} {t.wins}
                     </div>
                   </div>
@@ -409,7 +449,7 @@ const LeaderboardModal = ({
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={onClose}
-                className="w-full rounded-2xl bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 px-4 py-3 text-xl font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+                className="w-full rounded-xl bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 px-3 py-2 text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
               >
                 {t.got_it}
               </motion.button>
@@ -717,6 +757,18 @@ const ShareSlipModal = ({
   ]
   const shareText = shareMessages[Math.floor(Math.random() * shareMessages.length)]
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (show) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [show])
+
   const handleCopy = () => {
     navigator.clipboard.writeText(shareText)
     // You can add a toast notification here
@@ -740,7 +792,7 @@ const ShareSlipModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -748,35 +800,35 @@ const ShareSlipModal = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-            className="relative w-[90%] max-w-md rounded-3xl border border-white/10 bg-slate-900/90 p-6 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl"
+            className="relative w-[90%] max-w-sm rounded-xl border border-white/10 bg-slate-900/90 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
-            <div className="relative space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 shadow-[0_0_25px_rgba(59,130,246,0.7)] flex items-center justify-center text-2xl">
+            <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
+            <div className="relative space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 shadow-[0_0_25px_rgba(59,130,246,0.7)] flex items-center justify-center text-lg">
                   ✈️
                 </div>
-      <div>
-                  <p className="text-xl font-bold text-white">Share Your Bet</p>
-                  <p className="text-sm text-slate-300">Challenge your friends!</p>
-      </div>
+                <div>
+                  <p className="text-base font-bold text-white">Share Your Bet</p>
+                  <p className="text-xs text-slate-300">Challenge your friends!</p>
+                </div>
               </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm text-slate-300 leading-relaxed">{shareText}</p>
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                <p className="text-xs text-slate-300 leading-relaxed">{shareText}</p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <motion.button
                   whileTap={{ scale: 0.96 }}
                   onClick={handleCopy}
-                  className="flex-1 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-base font-semibold text-white hover:bg-white/20 transition"
+                  className="flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20 transition"
                 >
                   Copy Text
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.96 }}
                   onClick={handleTelegramShare}
-                  className="flex-1 rounded-2xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-4 py-3 text-base font-semibold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+                  className="flex-1 rounded-lg bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
                 >
                   Share on Telegram
                 </motion.button>
@@ -1034,6 +1086,18 @@ const ResultAnalysisModal = ({
   winRef?: React.RefObject<HTMLAudioElement>
   isMuted?: boolean
 }) => {
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (show) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [show])
+
   // Only render if we have a result snapshot
   if (!roundResult) {
     return null
@@ -1048,7 +1112,7 @@ const ResultAnalysisModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -1056,19 +1120,19 @@ const ResultAnalysisModal = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-            className="relative w-[90%] max-w-md rounded-3xl border border-white/10 bg-slate-900/90 p-6 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl"
+            className="relative w-[90%] max-w-sm rounded-xl border border-white/10 bg-slate-900/90 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
-            <div className="relative space-y-4">
+            <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
+            <div className="relative space-y-3">
               {/* Main Result */}
               <div className="text-center">
-                <div className="text-4xl mb-2">{isWin ? '🎉' : '😢'}</div>
-                <p className={`text-2xl font-bold ${isWin ? 'text-amber-400' : 'text-red-400'}`}>
+                <div className="text-3xl mb-1.5">{isWin ? '🎉' : '😢'}</div>
+                <p className={`text-xl font-bold ${isWin ? 'text-amber-400' : 'text-red-400'}`}>
                   {isWin ? 'YOU WON!' : 'YOU LOST'}
                 </p>
                 {isWin && (
-                  <p className="text-xl text-amber-300 mt-2 font-semibold">
+                  <p className="text-base text-amber-300 mt-1.5 font-semibold">
                     +{profit.toLocaleString()} Coins 🪙
                   </p>
                 )}
@@ -1076,12 +1140,12 @@ const ResultAnalysisModal = ({
 
               {/* AI Analysis Box - Only show on loss (Aggressive AI Mode) */}
               {!isWin && (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-red-400">🤖</span>
-                    <p className="text-sm font-semibold text-red-300">AI Analysis</p>
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-red-400 text-sm">🤖</span>
+                    <p className="text-xs font-semibold text-red-300">AI Analysis</p>
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-[10px] text-slate-400">
                     AI Model predicted: {result === 'HOME' ? currentMatch.home : result === 'DRAW' ? 'Draw' : currentMatch.away}
                   </p>
                   {(() => {
@@ -1091,7 +1155,7 @@ const ResultAnalysisModal = ({
                       "Data saw this coming. You didn't.",
                     ]
                     return (
-                      <p className="text-sm text-red-300 font-semibold">
+                      <p className="text-xs text-red-300 font-semibold">
                         {messages[Math.floor(Math.random() * messages.length)]}
                       </p>
                     )
@@ -1101,10 +1165,10 @@ const ResultAnalysisModal = ({
               
               {/* Win Message - Aggressive Victory Mode */}
               {isWin && (
-                <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-400">💰</span>
-                    <p className="text-sm font-semibold text-green-300">Victory Analysis</p>
+                <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-green-400 text-sm">💰</span>
+                    <p className="text-xs font-semibold text-green-300">Victory Analysis</p>
                   </div>
                   {(() => {
                     const messages = [
@@ -1113,7 +1177,7 @@ const ResultAnalysisModal = ({
                       "Smart Money Move. Keep stacking.",
                     ]
                     return (
-                      <p className="text-sm text-green-300 font-semibold">
+                      <p className="text-xs text-green-300 font-semibold">
                         {messages[Math.floor(Math.random() * messages.length)]}
                       </p>
                     )
@@ -1122,7 +1186,7 @@ const ResultAnalysisModal = ({
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 {isWin ? (
                   <motion.button
                     whileTap={{ scale: 0.9 }}
@@ -1161,7 +1225,7 @@ const ResultAnalysisModal = ({
                         onClose()
                       }, 500)
                     }}
-                    className="w-full rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 px-4 py-3 text-2xl font-black text-white shadow-[0_0_30px_rgba(251,191,36,0.6)] active:scale-95 active:shadow-[0_0_20px_rgba(251,191,36,0.4)] transition-all"
+                    className="w-full rounded-lg bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 px-3 py-2.5 text-base font-black text-white shadow-[0_0_30px_rgba(251,191,36,0.6)] active:scale-95 active:shadow-[0_0_20px_rgba(251,191,36,0.4)] transition-all"
                   >
                     💰 CLAIM {profit.toLocaleString()} COINS
                   </motion.button>
@@ -1170,7 +1234,7 @@ const ResultAnalysisModal = ({
                     <motion.button
                       whileTap={{ scale: 0.96 }}
                       onClick={onClose}
-                      className="flex-1 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-base font-semibold text-white hover:bg-white/20 transition"
+                      className="flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20 transition"
                     >
                       Close
                     </motion.button>
@@ -1181,7 +1245,7 @@ const ResultAnalysisModal = ({
                         window.open('https://t.me/your_channel', '_blank')
                         onClose()
                       }}
-                      className="flex-1 rounded-2xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-4 py-3 text-base font-semibold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+                      className="flex-1 rounded-lg bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
                     >
                       Go to Real Market 🚀
                     </motion.button>
