@@ -2695,7 +2695,7 @@ function App() {
   }
 
   return (
-    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 pt-4 pb-8 ${
+    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 pt-4 pb-8 max-w-md mx-auto px-4 ${
       (timeLeft <= 3 && timeLeft > 0 && gameState === 'BETTING') || showGoalFlash
         ? 'animate-pulse border-4 border-red-500/50' 
         : ''
@@ -2717,7 +2717,7 @@ function App() {
         />
       </div>
 
-      <div className="relative mx-auto flex max-w-5xl flex-1 flex-col min-h-0 gap-1.5 px-3 py-1 overflow-hidden">
+      <div className="relative mx-auto flex max-w-5xl flex-1 flex-col min-h-0 gap-1.5 py-1 overflow-hidden">
         {/* Top bar - Fixed Header */}
         <div className="flex-none flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
           <div className="flex items-center gap-3">
