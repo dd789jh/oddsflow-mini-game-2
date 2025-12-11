@@ -1140,26 +1140,30 @@ const ResultAnalysisModal = ({
 
               {/* AI Analysis Box - Only show on loss (Aggressive AI Mode) */}
               {!isWin && (
-                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-red-400 text-sm">🤖</span>
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 flex flex-col">
+                  {/* Title Row */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-red-400 text-base">🤖</span>
                     <p className="text-xs font-semibold text-red-300">AI Analysis</p>
                   </div>
-                  <p className="text-[10px] text-slate-400">
+                  {/* Prediction Info */}
+                  <p className="text-[10px] text-slate-400 mb-2 leading-relaxed">
                     AI Model predicted: {result === 'HOME' ? currentMatch.home : result === 'DRAW' ? 'Draw' : currentMatch.away}
                   </p>
-                  {(() => {
-                    const messages = [
-                      "The Banker loves your donation. 🤡",
-                      "Betting with feelings? Rookie mistake.",
-                      "Data saw this coming. You didn't.",
-                    ]
-                    return (
-                      <p className="text-xs text-red-300 font-semibold">
-                        {messages[Math.floor(Math.random() * messages.length)]}
-                      </p>
-                    )
-                  })()}
+                  {/* Warning Message */}
+                  <div className="flex items-start gap-2">
+                    <span className="text-red-400 text-sm shrink-0">⚠️</span>
+                    <p className="text-xs text-red-300 font-semibold leading-relaxed flex-1">
+                      {(() => {
+                        const messages = [
+                          "The Banker loves your donation. 🤡",
+                          "Betting with feelings? Rookie mistake.",
+                          "Data saw this coming. You didn't.",
+                        ]
+                        return messages[Math.floor(Math.random() * messages.length)]
+                      })()}
+                    </p>
+                  </div>
                 </div>
               )}
               
@@ -1186,7 +1190,7 @@ const ResultAnalysisModal = ({
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 {isWin ? (
                   <motion.button
                     whileTap={{ scale: 0.9 }}
@@ -1234,7 +1238,7 @@ const ResultAnalysisModal = ({
                     <motion.button
                       whileTap={{ scale: 0.96 }}
                       onClick={onClose}
-                      className="flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20 transition"
+                      className="flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20 transition"
                     >
                       Close
                     </motion.button>
@@ -1245,7 +1249,7 @@ const ResultAnalysisModal = ({
                         window.open('https://t.me/your_channel', '_blank')
                         onClose()
                       }}
-                      className="flex-1 rounded-lg bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+                      className="flex-1 rounded-lg bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
                     >
                       Go to Real Market 🚀
                     </motion.button>
