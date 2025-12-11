@@ -2816,15 +2816,12 @@ function App() {
   const handleInviteShare = () => {
     if (!userId) return
 
-    // Build Telegram share URL:
-    // https://t.me/share/url?url={App链接}?startapp={当前用户ID}&text=来猜球，送你2000金币！
-    //
-    // NOTE:
-    // - {App链接} ideally should be your bot Mini App link (e.g. https://t.me/<bot>?startapp=... or your WebApp URL).
-    // - We fallback to current page URL (without query/hash) for local/dev preview.
-    const baseAppUrl = `${window.location.origin}${window.location.pathname}`
-    const deepLink = `${baseAppUrl}?startapp=${userId}`
-    const text = '来猜球，送你2000金币！'
+    // Build Telegram share URL (per your required formula):
+    // https://t.me/share/url?url=encodeURIComponent(https://t.me/Oddsflow_minigame_bot/Miniapp?startapp=${currentUserId})
+    // &text=encodeURIComponent(🎁 送你 2000 金币！快来 Oddsflow 预测比赛赢大奖！)
+    const appBase = 'https://t.me/Oddsflow_minigame_bot/Miniapp'
+    const deepLink = `${appBase}?startapp=${userId}`
+    const text = '🎁 送你 2000 金币！快来 Oddsflow 预测比赛赢大奖！'
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(deepLink)}&text=${encodeURIComponent(text)}`
 
     // Prefer Telegram native open method inside Mini App
