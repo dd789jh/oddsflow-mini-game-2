@@ -10,6 +10,7 @@ declare global {
       WebApp?: {
         expand: () => void
         ready: () => void
+        setHeaderColor: (color: string) => void
         [key: string]: any
       }
     }
@@ -207,22 +208,22 @@ const Modal = ({
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-          className="relative w-[90%] max-w-md rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-[0_0_30px_rgba(59,130,246,0.4)]"
+          className="relative w-[90%] max-w-md rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)]"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
-          <div className="relative space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-[0_0_25px_rgba(99,102,241,0.7)]" />
+          <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
+          <div className="relative space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-[0_0_25px_rgba(99,102,241,0.7)]" />
               <div>
-                <p className="text-lg font-bold text-white">{title}</p>
-                <p className="text-sm text-slate-300">{description}</p>
+                <p className="text-base font-bold text-white">{title}</p>
+                <p className="text-xs text-slate-300">{description}</p>
               </div>
             </div>
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={onClose}
-              className={`w-full rounded-2xl px-4 py-3 text-base font-semibold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] ${
+              className={`w-full rounded-xl px-3 py-2 text-sm font-semibold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] ${
                 actionColor === 'green'
                   ? 'bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600'
                   : 'bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600'
@@ -260,23 +261,23 @@ const RulesModal = ({
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-          className="relative w-[90%] max-w-md rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl"
+          className="relative w-[90%] max-w-md rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
-          <div className="relative space-y-5">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-[0_0_25px_rgba(99,102,241,0.7)]" />
-              <p className="text-3xl font-bold text-white">{t.how_to_play}</p>
+          <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
+          <div className="relative space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-[0_0_25px_rgba(99,102,241,0.7)]" />
+              <p className="text-2xl font-bold text-white">{t.how_to_play}</p>
             </div>
             
             {/* Step 1: Fast Market */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl shrink-0">⏱️</div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+              <div className="flex items-start gap-2">
+                <div className="text-xl shrink-0">⏱️</div>
                 <div className="flex-1">
-                  <p className="text-lg font-bold text-cyan-400 mb-1">{t.step1_title}</p>
-                  <p className="text-sm text-slate-300 leading-relaxed">
+                  <p className="text-sm font-bold text-cyan-400 mb-1">{t.step1_title}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">
                     {t.step1_desc.split('**').map((part, i) => 
                       i % 2 === 1 ? <strong key={i} className="text-white font-semibold">{part}</strong> : part
                     )}
@@ -286,12 +287,12 @@ const RulesModal = ({
             </div>
 
             {/* Step 2: Smash to Boost */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl shrink-0">🔥</div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+              <div className="flex items-start gap-2">
+                <div className="text-xl shrink-0">🔥</div>
                 <div className="flex-1">
-                  <p className="text-lg font-bold text-red-400 mb-1">{t.step2_title}</p>
-                  <p className="text-sm text-slate-300 leading-relaxed">
+                  <p className="text-sm font-bold text-red-400 mb-1">{t.step2_title}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">
                     {t.step2_desc.split('**').map((part, i) => 
                       i % 2 === 1 ? <strong key={i} className="text-white font-semibold">{part}</strong> : part
                     )}
@@ -301,12 +302,12 @@ const RulesModal = ({
             </div>
 
             {/* Step 3: Win Big */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl shrink-0">💰</div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+              <div className="flex items-start gap-2">
+                <div className="text-xl shrink-0">💰</div>
                 <div className="flex-1">
-                  <p className="text-lg font-bold text-amber-400 mb-1">{t.step3_title}</p>
-                  <p className="text-sm text-slate-300 leading-relaxed">
+                  <p className="text-sm font-bold text-amber-400 mb-1">{t.step3_title}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">
                     {t.step3_desc.split('**').map((part, i) => 
                       i % 2 === 1 ? <strong key={i} className="text-white font-semibold">{part}</strong> : part
                     )}
@@ -316,12 +317,12 @@ const RulesModal = ({
             </div>
 
             {/* Step 4: Mine Coins */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl shrink-0">⛏️</div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+              <div className="flex items-start gap-2">
+                <div className="text-xl shrink-0">⛏️</div>
                 <div className="flex-1">
-                  <p className="text-lg font-bold text-green-400 mb-1">{t.step4_title}</p>
-                  <p className="text-sm text-slate-300 leading-relaxed">
+                  <p className="text-sm font-bold text-green-400 mb-1">{t.step4_title}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">
                     {t.step4_desc.split('**').map((part, i) => 
                       i % 2 === 1 ? <strong key={i} className="text-white font-semibold">{part}</strong> : part
                     )}
@@ -333,7 +334,7 @@ const RulesModal = ({
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={onClose}
-              className="w-full rounded-2xl bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 px-4 py-3 text-xl font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] active:scale-95 transition-all"
+              className="w-full rounded-xl bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 px-3 py-2 text-base font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] active:scale-95 transition-all"
             >
               {t.got_it}
             </motion.button>
@@ -603,7 +604,7 @@ const HolographicStadium = ({
                 className={`absolute inset-0 blur-2xl opacity-30 -z-10 bg-gradient-to-r ${TEAMS_DB[currentMatch.home].color}`}
                 style={{ transform: 'scale(2)' }}
               />
-              <p className="text-xl font-bold text-white relative z-0 drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
+              <p className="text-sm font-bold text-white relative z-0 drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
                 {currentMatch.home}
               </p>
             </div>
@@ -648,7 +649,7 @@ const HolographicStadium = ({
                 >
                   <div className="h-12 w-12 rounded-full border-2 border-cyan-400 border-t-transparent" />
                 </motion.div>
-                <p className="text-2xl font-bold text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-pulse">
+                <p className="text-xl font-bold text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-pulse">
                   LIVE
                 </p>
               </div>
@@ -660,7 +661,7 @@ const HolographicStadium = ({
                 animate={{ scale: 1, opacity: 1 }}
                 className="text-center"
               >
-                <p className="text-5xl font-black text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
+                <p className="text-4xl font-black text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
                   {liveScore.home} - {liveScore.away}
                 </p>
               </motion.div>
@@ -671,7 +672,7 @@ const HolographicStadium = ({
                 animate={{ scale: 1, opacity: 1 }}
                 className="text-center"
               >
-                <p className="text-5xl font-black text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
+                <p className="text-4xl font-black text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
                   {matchResult.home} - {matchResult.away}
                 </p>
               </motion.div>
@@ -687,7 +688,7 @@ const HolographicStadium = ({
                 className={`absolute inset-0 blur-2xl opacity-30 -z-10 bg-gradient-to-r ${TEAMS_DB[currentMatch.away].color}`}
                 style={{ transform: 'scale(2)' }}
               />
-              <p className="text-xl font-bold text-white relative z-0 drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
+              <p className="text-sm font-bold text-white relative z-0 drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
                 {currentMatch.away}
               </p>
             </div>
@@ -806,7 +807,7 @@ const StreakEffect = ({ type }: { type: 'fire' | 'ice' }) => {
         className="text-center"
       >
         <motion.h1
-          className={`text-6xl md:text-8xl font-black ${
+          className={`text-4xl md:text-6xl font-black ${
             type === 'fire'
               ? 'text-red-500 drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]'
               : 'text-blue-400 drop-shadow-[0_0_30px_rgba(59,130,246,0.8)]'
@@ -1310,7 +1311,7 @@ const SplashScreen = ({ show }: { show: boolean }) => {
             className="text-center"
           >
             <motion.h1
-              className="text-3xl md:text-5xl font-black text-white tracking-wider"
+              className="text-2xl md:text-3xl font-black text-white tracking-wider"
               initial={{ letterSpacing: '0.1em' }}
               animate={{ letterSpacing: '0.2em' }}
               transition={{ duration: 0.5 }}
@@ -1565,19 +1566,19 @@ const CommunityJackpot = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border-2 border-yellow-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-6 shadow-[0_0_40px_rgba(234,179,8,0.2)] backdrop-blur-xl"
+      className="rounded-xl border-2 border-yellow-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-3 shadow-[0_0_40px_rgba(234,179,8,0.2)] backdrop-blur-xl"
     >
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
+      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
         COMMUNITY TOTAL WON
       </p>
       <motion.div
         key={totalWon}
         initial={{ scale: 1.05 }}
         animate={{ scale: 1 }}
-        className="flex items-center gap-3"
+        className="flex items-center gap-2"
       >
-        <span className="text-3xl">⚠️</span>
-        <span className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
+        <span className="text-lg">⚠️</span>
+        <span className="text-lg md:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
           {totalWon.toLocaleString()} Coins
         </span>
       </motion.div>
@@ -1630,17 +1631,17 @@ const IntelBoard = ({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="rounded-2xl border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-4 shadow-[0_0_30px_rgba(6,182,212,0.3)] backdrop-blur-xl"
+        className="rounded-xl border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-3 shadow-[0_0_30px_rgba(6,182,212,0.3)] backdrop-blur-xl"
       >
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-2xl">📊</span>
-          <p className="text-lg font-bold text-cyan-300">LIVE MARKET VOLUME</p>
+        <div className="flex items-center gap-1.5 mb-3">
+          <span className="text-lg">📊</span>
+          <p className="text-sm font-bold text-cyan-300">LIVE MARKET VOLUME</p>
         </div>
         
-        <div className="space-y-3 mb-4">
+        <div className="space-y-2 mb-3">
           {/* Home Volume */}
           <div>
-            <div className="flex justify-between text-sm mb-1">
+            <div className="flex justify-between text-xs mb-0.5">
               <span className="text-slate-300">Home</span>
               <span className="text-cyan-300 font-semibold">{homePercent}%</span>
             </div>
@@ -1656,11 +1657,11 @@ const IntelBoard = ({
           
           {/* Draw Volume */}
           <div>
-            <div className="flex justify-between text-sm mb-1">
+            <div className="flex justify-between text-xs mb-0.5">
               <span className="text-slate-300">Draw</span>
               <span className="text-amber-300 font-semibold">{drawPercent}%</span>
             </div>
-            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${drawPercent}%` }}
@@ -1672,11 +1673,11 @@ const IntelBoard = ({
           
           {/* Away Volume */}
           <div>
-            <div className="flex justify-between text-sm mb-1">
+            <div className="flex justify-between text-xs mb-0.5">
               <span className="text-slate-300">Away</span>
               <span className="text-purple-300 font-semibold">{awayPercent}%</span>
             </div>
-            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${awayPercent}%` }}
@@ -1688,12 +1689,12 @@ const IntelBoard = ({
         </div>
         
         {isContrarian && (
-          <p className="text-sm text-green-400 font-semibold mb-2">
+          <p className="text-xs text-green-400 font-semibold mb-1.5">
             ⚠️ Contrarian Bet detected! Smart money is with you.
           </p>
         )}
         {isHeavy && (
-          <p className="text-sm text-red-400 font-semibold mb-2">
+          <p className="text-xs text-red-400 font-semibold mb-1.5">
             ⚠️ Public is heavy on this side. Beware of traps!
           </p>
         )}
@@ -1710,17 +1711,17 @@ const IntelBoard = ({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="rounded-2xl border-2 border-yellow-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-4 shadow-[0_0_30px_rgba(251,191,36,0.3)] backdrop-blur-xl"
+        className="rounded-xl border-2 border-yellow-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-3 shadow-[0_0_30px_rgba(251,191,36,0.3)] backdrop-blur-xl"
       >
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-2xl">💰</span>
-          <p className="text-lg font-bold text-yellow-300">PROFIT OPPORTUNITY</p>
+        <div className="flex items-center gap-1.5 mb-3">
+          <span className="text-lg">💰</span>
+          <p className="text-sm font-bold text-yellow-300">PROFIT OPPORTUNITY</p>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-            <p className="text-xs text-slate-400 mb-1">Potential Win</p>
-            <p className="text-lg font-semibold text-slate-300">
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="rounded-lg border border-white/10 bg-white/5 p-2">
+            <p className="text-[10px] text-slate-400 mb-0.5">Potential Win</p>
+            <p className="text-sm font-semibold text-slate-300">
               +{potentialWin.toLocaleString()} Coins
             </p>
           </div>
@@ -1734,10 +1735,10 @@ const IntelBoard = ({
               ]
             }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            className="rounded-xl border-2 border-yellow-400/50 bg-gradient-to-br from-yellow-500/20 to-amber-500/20 p-3"
+            className="rounded-lg border-2 border-yellow-400/50 bg-gradient-to-br from-yellow-500/20 to-amber-500/20 p-2"
           >
-            <p className="text-xs text-yellow-300 mb-1">Invite Reward</p>
-            <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-300">
+            <p className="text-[10px] text-yellow-300 mb-0.5">Invite Reward</p>
+            <p className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-300">
               +500 Coins
             </p>
           </motion.div>
@@ -1746,7 +1747,7 @@ const IntelBoard = ({
         <motion.button
           whileTap={{ scale: 0.96 }}
           onClick={onInviteClick}
-          className="w-full rounded-xl bg-gradient-to-r from-green-400 via-emerald-500 to-green-600 px-4 py-3 text-base font-bold text-white shadow-[0_0_20px_rgba(34,197,94,0.4)]"
+          className="w-full rounded-lg bg-gradient-to-r from-green-400 via-emerald-500 to-green-600 px-3 py-2 text-sm font-bold text-white shadow-[0_0_20px_rgba(34,197,94,0.4)]"
         >
           Claim 500 Coins 🚀
         </motion.button>
@@ -1761,14 +1762,14 @@ const IntelBoard = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-4 shadow-[0_0_30px_rgba(59,130,246,0.3)] backdrop-blur-xl"
+      className="rounded-xl border-2 border-blue-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-3 shadow-[0_0_30px_rgba(59,130,246,0.3)] backdrop-blur-xl"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-2xl">🤖</span>
-        <p className="text-lg font-bold text-blue-300">AI MODEL ALERT</p>
+      <div className="flex items-center gap-1.5 mb-3">
+        <span className="text-lg">🤖</span>
+        <p className="text-sm font-bold text-blue-300">AI MODEL ALERT</p>
       </div>
       
-      <div className="rounded-xl border border-white/10 bg-black/40 p-3 mb-4 font-mono text-xs text-green-400 overflow-hidden">
+      <div className="rounded-lg border border-white/10 bg-black/40 p-2 mb-3 font-mono text-[10px] text-green-400 overflow-hidden">
         <motion.div
           animate={{ x: [0, -100, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
@@ -1778,14 +1779,14 @@ const IntelBoard = ({
         </motion.div>
       </div>
       
-      <p className="text-sm text-slate-300 mb-4">
+      <p className="text-xs text-slate-300 mb-3">
         AI Model detected a significant odds divergence. Unlock full analysis in our channel.
       </p>
       
       <motion.button
         whileTap={{ scale: 0.96 }}
         onClick={onChannelClick}
-        className="w-full rounded-xl border-2 border-blue-400/50 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 px-4 py-3 text-base font-bold text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-2"
+        className="w-full rounded-lg border-2 border-blue-400/50 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 px-3 py-2 text-sm font-bold text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-1.5"
       >
         <span>🔓</span>
         <span>Unlock Analysis in Channel</span>
@@ -1982,10 +1983,12 @@ function App() {
   // Telegram WebApp - Force fullscreen and ready state
   useEffect(() => {
     if (window.Telegram?.WebApp) {
-      // Force expand to fullscreen
+      // 1. 告诉 Telegram 展开全屏 (不再是半屏)
       window.Telegram.WebApp.expand()
-      // Notify Telegram that the app is ready
+      // 2. 告诉 Telegram 应用已准备好 (消除加载白屏)
       window.Telegram.WebApp.ready()
+      // 3. 强制设置标题栏颜色为深色，与背景融合
+      window.Telegram.WebApp.setHeaderColor('#0f172a') // 使用你的背景色 slate-900
     }
   }, [])
 
@@ -2624,7 +2627,7 @@ function App() {
   }
 
   return (
-    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 ${
+    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 pt-4 pb-8 ${
       (timeLeft <= 3 && timeLeft > 0 && gameState === 'BETTING') || showGoalFlash
         ? 'animate-pulse border-4 border-red-500/50' 
         : ''
@@ -2646,9 +2649,9 @@ function App() {
         />
       </div>
 
-      <div className="relative mx-auto flex max-w-5xl flex-1 flex-col min-h-0 gap-2 px-4 py-2 overflow-hidden">
+      <div className="relative mx-auto flex max-w-5xl flex-1 flex-col min-h-0 gap-1.5 px-3 py-1 overflow-hidden">
         {/* Top bar - Fixed Header */}
-        <div className="flex-none flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-2 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
+        <div className="flex-none flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
           <div className="flex items-center gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -2656,9 +2659,9 @@ function App() {
                 playSfx('click')
                 setShowLeaderboardModal(true)
               }}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition hover:bg-white/20 focus:outline-none"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition hover:bg-white/20 focus:outline-none"
             >
-              <Trophy className="h-5 w-5" />
+              <Trophy className="h-4 w-4" />
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -2666,22 +2669,22 @@ function App() {
                 playSfx('click')
                 setShowRulesModal(true)
               }}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition hover:bg-white/20 focus:outline-none"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition hover:bg-white/20 focus:outline-none"
             >
-              <Info className="h-5 w-5" />
+              <Info className="h-4 w-4" />
             </motion.button>
             <div className="flex flex-col min-w-0">
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-400">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-cyan-400">
                 LIVE PREDICTION MARKET
               </p>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <p className="text-lg font-bold text-slate-100 whitespace-nowrap">
+              <div className="flex items-center gap-1 flex-wrap">
+                <p className="text-sm font-bold text-slate-100 whitespace-nowrap">
                   OddsFlow
                 </p>
-                <span className="text-[10px] font-bold bg-black text-amber-400 px-1.5 py-0.5 rounded leading-tight shrink-0">
+                <span className="text-[8px] font-bold bg-black text-amber-400 px-1 py-0.5 rounded leading-tight shrink-0">
                   AI
                 </span>
-                <p className="text-lg font-bold text-slate-100 whitespace-nowrap">
+                <p className="text-sm font-bold text-slate-100 whitespace-nowrap">
                   Exchange
                 </p>
               </div>
@@ -2691,39 +2694,39 @@ function App() {
             <motion.div
               animate={walletPulse ? { scale: [1, 1.5, 1] } : {}}
               transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-100 shadow-[0_0_15px_rgba(251,191,36,0.45)]"
+              className="flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-100 shadow-[0_0_15px_rgba(251,191,36,0.45)]"
             >
-              <span className="text-lg">🪙</span>
-              <span className="text-white font-bold">{coins.toLocaleString()}</span>
+              <span className="text-sm">🪙</span>
+              <span className="text-white font-bold text-xs">{coins.toLocaleString()}</span>
             </motion.div>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={toggleLang}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition hover:bg-white/20 focus:outline-none text-xs font-bold"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition hover:bg-white/20 focus:outline-none text-[10px] font-bold"
             >
               {lang === 'en' ? '中' : 'EN'}
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={toggleMute}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition hover:bg-white/20 focus:outline-none"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition hover:bg-white/20 focus:outline-none"
             >
               {isMuted ? (
-                <VolumeX className="h-5 w-5" />
+                <VolumeX className="h-4 w-4" />
               ) : (
-                <Volume2 className="h-5 w-5" />
+                <Volume2 className="h-4 w-4" />
               )}
             </motion.button>
           </div>
         </div>
 
         {/* Countdown Timer - Fixed */}
-        <div className="flex-none rounded-2xl border border-white/10 bg-white/5 px-4 py-2 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs uppercase tracking-[0.2em] text-cyan-400">
+        <div className="flex-none rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] uppercase tracking-[0.15em] text-cyan-400">
               {gameState === 'BETTING' ? 'BETTING OPEN' : gameState === 'LOCKED' ? 'MATCH IN PROGRESS' : 'RESULT'}
             </span>
-            <span className={`text-lg font-bold ${
+            <span className={`text-sm font-bold ${
               gameState === 'BETTING' ? 'text-green-400' : 
               gameState === 'LOCKED' ? 'text-red-400' : 
               'text-amber-400'
@@ -2748,7 +2751,7 @@ function App() {
         </div>
 
         {/* Immersive Holographic Stadium with Layered Layout - Responsive Height */}
-        <div className="shrink-0 h-[30vh] sm:h-[35vh] md:h-80">
+        <div className="shrink-0 h-48 sm:h-[25vh] md:h-64">
           <HolographicStadium
             gameState={gameState}
             matchResult={matchResult}
@@ -2763,32 +2766,32 @@ function App() {
 
         {/* Active Bet Indicator - Fixed */}
         {userBet.type !== null && (
-          <div className="flex-none flex items-center gap-2">
+          <div className="flex-none flex items-center gap-1.5">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex-1 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-3 backdrop-blur-sm"
+              className="flex-1 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 backdrop-blur-sm"
             >
               {gameState === 'BETTING' && (
-                <div className="flex items-center gap-2 text-cyan-300">
-                  <span>✅</span>
-                  <span className="font-semibold text-sm md:text-base">
+                <div className="flex items-center gap-1.5 text-cyan-300">
+                  <span className="text-xs">✅</span>
+                  <span className="font-semibold text-xs">
                     {t.you_bet} {userBet.amount} 🪙 {t.on} {userBet.type === 'home' ? t.home_win : userBet.type === 'draw' ? t.draw : t.away_win}
                   </span>
                 </div>
               )}
               {gameState === 'RESULT' && betResult === 'win' && roundResult && (
-                <div className="flex items-center gap-2 text-amber-300">
-                  <span>🎉</span>
-                  <span className="font-semibold text-sm md:text-base">
+                <div className="flex items-center gap-1.5 text-amber-300">
+                  <span className="text-xs">🎉</span>
+                  <span className="font-semibold text-xs">
                     WIN! +{roundResult.profit} {t.coins}
                   </span>
                 </div>
               )}
               {gameState === 'RESULT' && betResult === 'lose' && (
-                <div className="flex items-center gap-2 text-red-300">
-                  <span>❌</span>
-                  <span className="font-semibold text-sm md:text-base">
+                <div className="flex items-center gap-1.5 text-red-300">
+                  <span className="text-xs">❌</span>
+                  <span className="font-semibold text-xs">
                     {t.lost} {t.try_again}
                   </span>
                 </div>
@@ -2801,7 +2804,7 @@ function App() {
                   playSfx('click')
                   setShowShareModal(true)
                 }}
-                className="rounded-xl border border-cyan-400/30 bg-cyan-400/20 px-4 py-3 text-sm font-semibold text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.4)] hover:bg-cyan-400/30 transition"
+                className="rounded-lg border border-cyan-400/30 bg-cyan-400/20 px-3 py-2 text-xs font-semibold text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.4)] hover:bg-cyan-400/30 transition"
               >
                 Share ✈️
               </motion.button>
@@ -2811,7 +2814,7 @@ function App() {
 
         {/* Betting Buttons - Fixed */}
         {gameState === 'BETTING' ? (
-          <div className="flex-none grid grid-cols-3 gap-2">
+          <div className="flex-none grid grid-cols-3 gap-1.5">
             <motion.button
               whileTap={{ scale: 0.9 }}
               animate={coins >= 100 && userBet.type === null ? {
@@ -2829,17 +2832,17 @@ function App() {
               }}
               onClick={(e) => handlePlaceBet('home', e)}
               disabled={coins < 100 || userBet.type !== null}
-              className={`rounded-2xl border-2 p-5 text-center font-bold shadow-lg transition active:scale-95 active:opacity-80 ${
+              className={`rounded-xl border-2 p-3 text-center font-bold shadow-lg transition active:scale-95 active:opacity-80 ${
                 userBet.type === 'home'
                   ? 'border-cyan-400 bg-cyan-400/20 text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.5)]'
                   : 'border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/30'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              <p className="text-sm mb-1 opacity-80">Home Win</p>
-              <div className="flex items-center justify-center gap-1 mb-2">
-                <p className="text-2xl">{currentMatch.odds.home}x</p>
+              <p className="text-xs mb-0.5 opacity-80">Home Win</p>
+              <div className="flex items-center justify-center gap-0.5 mb-1">
+                <p className="text-lg">{currentMatch.odds.home}x</p>
                 {currentMatch.oddsTrend.home && (
-                  <span className={`text-lg font-bold ${
+                  <span className={`text-sm font-bold ${
                     currentMatch.oddsTrend.home === 'up' ? 'text-red-500' : 'text-green-500'
                   }`}>
                     {currentMatch.oddsTrend.home === 'up' ? '↑' : '↓'}
@@ -2847,9 +2850,9 @@ function App() {
                 )}
               </div>
               {userBet.type === 'home' ? (
-                <p className="text-xs text-cyan-300">Bet: {userBet.amount} 🪙</p>
+                <p className="text-[10px] text-cyan-300">Bet: {userBet.amount} 🪙</p>
               ) : (
-                <p className="text-xs opacity-60">Bet: 100 🪙</p>
+                <p className="text-[10px] opacity-60">Bet: 100 🪙</p>
               )}
             </motion.button>
 
@@ -2870,17 +2873,17 @@ function App() {
               }}
               onClick={(e) => handlePlaceBet('draw', e)}
               disabled={coins < 100 || userBet.type !== null}
-              className={`rounded-2xl border-2 p-5 text-center font-bold shadow-lg transition active:scale-95 active:opacity-80 ${
+              className={`rounded-xl border-2 p-3 text-center font-bold shadow-lg transition active:scale-95 active:opacity-80 ${
                 userBet.type === 'draw'
                   ? 'border-amber-400 bg-amber-400/20 text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.5)]'
                   : 'border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/30'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              <p className="text-sm mb-1 opacity-80">Draw</p>
-              <div className="flex items-center justify-center gap-1 mb-2">
-                <p className="text-2xl">{currentMatch.odds.draw}x</p>
+              <p className="text-xs mb-0.5 opacity-80">Draw</p>
+              <div className="flex items-center justify-center gap-0.5 mb-1">
+                <p className="text-lg">{currentMatch.odds.draw}x</p>
                 {currentMatch.oddsTrend.draw && (
-                  <span className={`text-lg font-bold ${
+                  <span className={`text-sm font-bold ${
                     currentMatch.oddsTrend.draw === 'up' ? 'text-red-500' : 'text-green-500'
                   }`}>
                     {currentMatch.oddsTrend.draw === 'up' ? '↑' : '↓'}
@@ -2888,9 +2891,9 @@ function App() {
                 )}
               </div>
               {userBet.type === 'draw' ? (
-                <p className="text-xs text-amber-300">Bet: {userBet.amount} 🪙</p>
+                <p className="text-[10px] text-amber-300">Bet: {userBet.amount} 🪙</p>
               ) : (
-                <p className="text-xs opacity-60">Bet: 100 🪙</p>
+                <p className="text-[10px] opacity-60">Bet: 100 🪙</p>
               )}
             </motion.button>
 
@@ -2911,17 +2914,17 @@ function App() {
               }}
               onClick={(e) => handlePlaceBet('away', e)}
               disabled={coins < 100 || userBet.type !== null}
-              className={`rounded-2xl border-2 p-5 text-center font-bold shadow-lg transition active:scale-95 active:opacity-80 ${
+              className={`rounded-xl border-2 p-3 text-center font-bold shadow-lg transition active:scale-95 active:opacity-80 ${
                 userBet.type === 'away'
                   ? 'border-purple-400 bg-purple-400/20 text-purple-300 shadow-[0_0_20px_rgba(168,85,247,0.5)]'
                   : 'border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/30'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              <p className="text-sm mb-1 opacity-80">Away Win</p>
-              <div className="flex items-center justify-center gap-1 mb-2">
-                <p className="text-2xl">{currentMatch.odds.away}x</p>
+              <p className="text-xs mb-0.5 opacity-80">Away Win</p>
+              <div className="flex items-center justify-center gap-0.5 mb-1">
+                <p className="text-lg">{currentMatch.odds.away}x</p>
                 {currentMatch.oddsTrend.away && (
-                  <span className={`text-lg font-bold ${
+                  <span className={`text-sm font-bold ${
                     currentMatch.oddsTrend.away === 'up' ? 'text-red-500' : 'text-green-500'
                   }`}>
                     {currentMatch.oddsTrend.away === 'up' ? '↑' : '↓'}
@@ -2929,9 +2932,9 @@ function App() {
                 )}
               </div>
               {userBet.type === 'away' ? (
-                <p className="text-xs text-purple-300">Bet: {userBet.amount} 🪙</p>
+                <p className="text-[10px] text-purple-300">Bet: {userBet.amount} 🪙</p>
               ) : (
-                <p className="text-xs opacity-60">Bet: 100 🪙</p>
+                <p className="text-[10px] opacity-60">Bet: 100 🪙</p>
               )}
             </motion.button>
           </div>
@@ -2946,8 +2949,8 @@ function App() {
             />
           </div>
         ) : (
-          <div className="flex-none rounded-2xl border border-white/20 bg-white/5 p-4 text-center backdrop-blur-xl">
-            <p className="text-sm text-slate-400">Match finished. Next round starting...</p>
+          <div className="flex-none rounded-xl border border-white/20 bg-white/5 p-3 text-center backdrop-blur-xl">
+            <p className="text-xs text-slate-400">Match finished. Next round starting...</p>
           </div>
         )}
 
@@ -3074,7 +3077,7 @@ function App() {
               className="text-center"
             >
               <motion.h1
-                className="text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 drop-shadow-[0_0_40px_rgba(251,191,36,0.8)]"
+                className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 drop-shadow-[0_0_40px_rgba(251,191,36,0.8)]"
                 animate={{
                   textShadow: [
                     '0 0 20px rgba(251,191,36,0.8), 0 0 40px rgba(251,191,36,0.6)',
@@ -3099,3 +3102,10 @@ function App() {
 }
 
 export default App
+useEffect(() => {
+  // 强制 Telegram 展开全屏
+  if (window.Telegram?.WebApp) {
+    window.Telegram.WebApp.expand();
+    window.Telegram.WebApp.ready();
+  }
+}, []);
