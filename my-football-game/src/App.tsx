@@ -6,7 +6,8 @@
  * Please run this SQL in your Supabase SQL Editor to create the users table:
  * 
  * CREATE TABLE users (
- *   id BIGINT PRIMARY KEY,
+ *   telegram_id BIGINT PRIMARY KEY,
+ *   first_name TEXT,
  *   username TEXT,
  *   coins INTEGER DEFAULT 1000 NOT NULL,
  *   is_vip BOOLEAN DEFAULT false NOT NULL,
@@ -15,7 +16,13 @@
  * );
  * 
  * -- Optional: Create an index for faster lookups
- * CREATE INDEX idx_users_id ON users(id);
+ * CREATE INDEX idx_users_telegram_id ON users(telegram_id);
+ *
+ * -- If you ALREADY created the table with `id` as the PK, you can migrate with:
+ * -- ALTER TABLE users RENAME COLUMN id TO telegram_id;
+ * -- ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT;
+ * -- ALTER INDEX IF EXISTS idx_users_id RENAME TO idx_users_telegram_id;
+ * -- CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
  * 
  * -- Optional: Create a function to automatically update updated_at
  * CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -2039,6 +2046,7 @@ const TOTAL_CYCLE = BETTING_TIME + LOCKED_TIME + RESULT_TIME // 50 seconds total
 function App() {
   // User state (Supabase connected)
   const [userId, setUserId] = useState<number | null>(null)
+  const [firstName, setFirstName] = useState<string | null>(null)
   const [username, setUsername] = useState<string | null>(null)
   const [isVip, setIsVip] = useState(false)
   const [isUserLoaded, setIsUserLoaded] = useState(false)
@@ -2106,18 +2114,28 @@ function App() {
     const initializeUser = async () => {
       try {
         let telegramUserId: number | null = null
+        let telegramFirstName: string | null = null
         let telegramUsername: string | null = null
 
         // Detect Telegram user
         if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
           const tgUser = window.Telegram.WebApp.initDataUnsafe.user
           telegramUserId = tgUser.id
+          telegramFirstName = tgUser.first_name || null
           telegramUsername = tgUser.username || `user_${telegramUserId}`
         } else {
           // Fallback for local development (non-Telegram environment)
-          telegramUserId = 999999999 // test_user_id
-          telegramUsername = 'test_user'
-          console.log('⚠️ Running in non-Telegram environment, using test user')
+          // IMPORTANT: Use a per-browser stable id to avoid "everyone shares the same wallet" during dev.
+          const devKey = 'dev_telegram_id'
+          const stored = localStorage.getItem(devKey)
+          telegramUserId = stored ? Number(stored) : null
+          if (!telegramUserId || Number.isNaN(telegramUserId)) {
+            telegramUserId = Math.floor(Date.now() + Math.random() * 100000)
+            localStorage.setItem(devKey, String(telegramUserId))
+          }
+          telegramFirstName = 'Dev'
+          telegramUsername = `dev_${telegramUserId}`
+          console.log('⚠️ Running in non-Telegram environment, using dev user:', telegramUserId)
         }
 
         if (!telegramUserId) {
@@ -2127,13 +2145,14 @@ function App() {
         }
 
         setUserId(telegramUserId)
+        setFirstName(telegramFirstName)
         setUsername(telegramUsername)
 
         // Query database for existing user
         const { data: existingUser, error: queryError } = await supabase
           .from('users')
-          .select('id, username, coins, is_vip')
-          .eq('id', telegramUserId)
+          .select('telegram_id, first_name, username, coins, is_vip')
+          .eq('telegram_id', telegramUserId)
           .single()
 
         if (queryError && queryError.code !== 'PGRST116') {
@@ -2148,13 +2167,17 @@ function App() {
           console.log('✅ Existing user found:', existingUser)
           setCoins(existingUser.coins || 1000)
           setIsVip(existingUser.is_vip || false)
+          // Prefer DB name if present, otherwise keep Telegram-provided fallback
+          setFirstName(existingUser.first_name || telegramFirstName)
+          setUsername(existingUser.username || telegramUsername)
         } else {
           // New user: create record
           console.log('🆕 Creating new user...')
           const { data: newUser, error: insertError } = await supabase
             .from('users')
             .insert({
-              id: telegramUserId,
+              telegram_id: telegramUserId,
+              first_name: telegramFirstName,
               username: telegramUsername,
               coins: 1000,
               is_vip: false,
@@ -2171,6 +2194,8 @@ function App() {
             console.log('✅ New user created:', newUser)
             setCoins(newUser.coins || 1000)
             setIsVip(newUser.is_vip || false)
+            setFirstName(newUser.first_name || telegramFirstName)
+            setUsername(newUser.username || telegramUsername)
           }
         }
 
@@ -2186,10 +2211,12 @@ function App() {
   
   // Log user info when loaded (using variables to avoid unused warnings)
   useEffect(() => {
-    if (isUserLoaded && userId && username) {
-      console.log(`👤 User loaded: ${username} (ID: ${userId}, VIP: ${isVip})`)
+    if (isUserLoaded && userId) {
+      console.log(
+        `👤 User loaded: ${firstName || username || 'Unknown'} (telegram_id: ${userId}, VIP: ${isVip})`,
+      )
     }
-  }, [isUserLoaded, userId, username, isVip])
+  }, [isUserLoaded, userId, firstName, username, isVip])
 
   const bgmRef = useRef<HTMLAudioElement | null>(null)
   const clickRef = useRef<HTMLAudioElement | null>(null)
@@ -2806,10 +2833,32 @@ function App() {
     // Sync to Supabase database
     if (userId) {
       try {
+        // Always scope updates to the CURRENT Telegram user
+        const { data: currentUser, error: fetchError } = await supabase
+          .from('users')
+          .select('coins')
+          .eq('telegram_id', userId)
+          .single()
+
+        if (fetchError) {
+          console.error('❌ Error fetching current coins:', fetchError)
+          setCoins((prev) => prev + betAmount) // rollback
+          return
+        }
+
+        const dbCoins = currentUser?.coins ?? 0
+        const newCoins = dbCoins - betAmount
+        if (newCoins < 0) {
+          // DB says insufficient funds (could happen if user has multiple sessions)
+          setCoins((prev) => prev + betAmount) // rollback
+          setShowReviveModal(true)
+          return
+        }
+
         const { data: updatedUser, error } = await supabase
           .from('users')
-          .update({ coins: coins - betAmount })
-          .eq('id', userId)
+          .update({ coins: newCoins })
+          .eq('telegram_id', userId)
           .select()
           .single()
 
@@ -2856,7 +2905,7 @@ function App() {
         const { data: currentUser, error: fetchError } = await supabase
           .from('users')
           .select('coins')
-          .eq('id', userId)
+          .eq('telegram_id', userId)
           .single()
 
         if (fetchError) {
@@ -2872,7 +2921,7 @@ function App() {
         const { data: updatedUser, error } = await supabase
           .from('users')
           .update({ coins: newCoins })
-          .eq('id', userId)
+          .eq('telegram_id', userId)
           .select()
           .single()
 
@@ -2966,6 +3015,9 @@ function App() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <div className="max-w-[120px] truncate text-[10px] font-semibold text-slate-200">
+              Hello, {firstName || username || '...'}
+            </div>
             <motion.div
               animate={walletPulse ? { scale: [1, 1.5, 1] } : {}}
               transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -3297,7 +3349,7 @@ function App() {
                 const { data: currentUser, error: fetchError } = await supabase
                   .from('users')
                   .select('coins')
-                  .eq('id', userId)
+                  .eq('telegram_id', userId)
                   .single()
 
                 if (fetchError) {
@@ -3313,7 +3365,7 @@ function App() {
                 const { data: updatedUser, error } = await supabase
                   .from('users')
                   .update({ coins: newCoins })
-                  .eq('id', userId)
+                  .eq('telegram_id', userId)
                   .select()
                   .single()
 
