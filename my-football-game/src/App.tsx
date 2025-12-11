@@ -1423,7 +1423,7 @@ const TapToStartOverlay = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/80 backdrop-blur-md cursor-pointer"
+          className="fixed inset-0 z-[9999] w-full h-full flex items-center justify-center bg-slate-900/80 backdrop-blur-md cursor-pointer"
           onClick={onTap}
         >
           <motion.div
@@ -1433,7 +1433,7 @@ const TapToStartOverlay = ({
             className="text-center"
           >
             <motion.div
-              className="inline-block bg-cyan-500/20 border-2 border-cyan-400 px-8 py-4 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.5)]"
+              className="inline-flex flex-col items-center gap-4 bg-cyan-500/20 border-2 border-cyan-400 px-8 py-4 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.5)]"
               animate={{ 
                 opacity: [0.7, 1, 0.7],
                 scale: [1, 1.05, 1],
@@ -1445,10 +1445,10 @@ const TapToStartOverlay = ({
               }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <p className="text-2xl md:text-3xl font-bold text-white mb-2">
+              <p className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
                 TAP ANYWHERE TO START GAME 🔊
               </p>
-              <p className="text-sm text-cyan-300/80">Click to unlock audio</p>
+              <p className="text-base text-cyan-400 animate-pulse">Click to unlock audio</p>
             </motion.div>
           </motion.div>
         </motion.div>
