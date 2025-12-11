@@ -6,35 +6,13 @@
  * Please run this SQL in your Supabase SQL Editor to create the users table:
  * 
  * CREATE TABLE users (
- *   telegram_id BIGINT PRIMARY KEY,
- *   first_name TEXT,
- *   username TEXT,
- *   coins INTEGER DEFAULT 1000 NOT NULL,
- *   is_vip BOOLEAN DEFAULT false NOT NULL,
- *   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
- *   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+ *   telegram_id BIGINT UNIQUE,
+ *   coins BIGINT DEFAULT 1000 NOT NULL,
+ *   first_name TEXT
  * );
  * 
  * -- Optional: Create an index for faster lookups
- * CREATE INDEX idx_users_telegram_id ON users(telegram_id);
- *
- * -- If you ALREADY created the table with `id` as the PK, you can migrate with:
- * -- ALTER TABLE users RENAME COLUMN id TO telegram_id;
- * -- ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT;
- * -- ALTER INDEX IF EXISTS idx_users_id RENAME TO idx_users_telegram_id;
- * -- CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
- * 
- * -- Optional: Create a function to automatically update updated_at
- * CREATE OR REPLACE FUNCTION update_updated_at_column()
- * RETURNS TRIGGER AS $$
- * BEGIN
- *   NEW.updated_at = NOW();
- *   RETURN NEW;
- * END;
- * $$ language 'plpgsql';
- * 
- * CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
- * FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+ * CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
  * 
  * ============================================
  */
@@ -2047,8 +2025,6 @@ function App() {
   // User state (Supabase connected)
   const [userId, setUserId] = useState<number | null>(null)
   const [firstName, setFirstName] = useState<string | null>(null)
-  const [username, setUsername] = useState<string | null>(null)
-  const [isVip, setIsVip] = useState(false)
   const [isUserLoaded, setIsUserLoaded] = useState(false)
   
   const [timeLeft, setTimeLeft] = useState(TOTAL_CYCLE)
@@ -2115,14 +2091,12 @@ function App() {
       try {
         let telegramUserId: number | null = null
         let telegramFirstName: string | null = null
-        let telegramUsername: string | null = null
 
         // Detect Telegram user
         if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
           const tgUser = window.Telegram.WebApp.initDataUnsafe.user
           telegramUserId = tgUser.id
           telegramFirstName = tgUser.first_name || null
-          telegramUsername = tgUser.username || `user_${telegramUserId}`
         } else {
           // Fallback for local development (non-Telegram environment)
           // IMPORTANT: Use a per-browser stable id to avoid "everyone shares the same wallet" during dev.
@@ -2134,7 +2108,6 @@ function App() {
             localStorage.setItem(devKey, String(telegramUserId))
           }
           telegramFirstName = 'Dev'
-          telegramUsername = `dev_${telegramUserId}`
           console.log('⚠️ Running in non-Telegram environment, using dev user:', telegramUserId)
         }
 
@@ -2146,12 +2119,11 @@ function App() {
 
         setUserId(telegramUserId)
         setFirstName(telegramFirstName)
-        setUsername(telegramUsername)
 
         // Query database for existing user
         const { data: existingUser, error: queryError } = await supabase
           .from('users')
-          .select('telegram_id, first_name, username, coins, is_vip')
+          .select('telegram_id, coins, first_name')
           .eq('telegram_id', telegramUserId)
           .single()
 
@@ -2166,10 +2138,8 @@ function App() {
           // Existing user: load their data
           console.log('✅ Existing user found:', existingUser)
           setCoins(existingUser.coins || 1000)
-          setIsVip(existingUser.is_vip || false)
           // Prefer DB name if present, otherwise keep Telegram-provided fallback
           setFirstName(existingUser.first_name || telegramFirstName)
-          setUsername(existingUser.username || telegramUsername)
         } else {
           // New user: create record
           console.log('🆕 Creating new user...')
@@ -2178,9 +2148,6 @@ function App() {
             .insert({
               telegram_id: telegramUserId,
               first_name: telegramFirstName,
-              username: telegramUsername,
-              coins: 1000,
-              is_vip: false,
             })
             .select()
             .single()
@@ -2189,13 +2156,10 @@ function App() {
             console.error('❌ Error creating user:', insertError)
             // Fallback to default values
             setCoins(1000)
-            setIsVip(false)
           } else {
             console.log('✅ New user created:', newUser)
             setCoins(newUser.coins || 1000)
-            setIsVip(newUser.is_vip || false)
             setFirstName(newUser.first_name || telegramFirstName)
-            setUsername(newUser.username || telegramUsername)
           }
         }
 
@@ -2213,10 +2177,10 @@ function App() {
   useEffect(() => {
     if (isUserLoaded && userId) {
       console.log(
-        `👤 User loaded: ${firstName || username || 'Unknown'} (telegram_id: ${userId}, VIP: ${isVip})`,
+        `👤 User loaded: ${firstName || 'Unknown'} (telegram_id: ${userId})`,
       )
     }
-  }, [isUserLoaded, userId, firstName, username, isVip])
+  }, [isUserLoaded, userId, firstName])
 
   const bgmRef = useRef<HTMLAudioElement | null>(null)
   const clickRef = useRef<HTMLAudioElement | null>(null)
@@ -3016,7 +2980,7 @@ function App() {
           </div>
           <div className="flex items-center gap-3">
             <div className="max-w-[120px] truncate text-[10px] font-semibold text-slate-200">
-              Hello, {firstName || username || '...'}
+              Hi, {firstName || '...'}
             </div>
             <motion.div
               animate={walletPulse ? { scale: [1, 1.5, 1] } : {}}
