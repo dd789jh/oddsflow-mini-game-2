@@ -1852,11 +1852,11 @@ const IntelBoard = ({
         <p className="text-sm font-bold text-blue-300">AI MODEL ALERT</p>
       </div>
       
-      <div className="rounded-lg border border-white/10 bg-black/40 p-2 mb-3 font-mono text-[10px] text-green-400 overflow-hidden">
+      <div className="rounded-lg border border-white/10 bg-black/40 p-3 mb-3 font-mono text-[10px] text-green-400 h-auto min-h-[3rem] whitespace-normal break-words">
         <motion.div
           animate={{ x: [0, -100, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-          className="whitespace-nowrap"
+          className="whitespace-normal break-words"
         >
           {'> AI Model detected a significant odds divergence...'.repeat(3)}
         </motion.div>
@@ -2710,7 +2710,7 @@ function App() {
   }
 
   return (
-    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 pt-4 pb-8 max-w-md mx-auto px-4 ${
+    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 pt-4 pb-10 max-w-md mx-auto px-4 ${
       (timeLeft <= 3 && timeLeft > 0 && gameState === 'BETTING') || showGoalFlash
         ? 'animate-pulse border-4 border-red-500/50' 
         : ''
