@@ -706,7 +706,7 @@ const HolographicStadium = ({
                 key={`${liveScore.home}-${liveScore.away}`}
                 initial={{ scale: 1.2, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-center"
+                className="text-center mb-4"
               >
                 <p className="text-4xl font-black text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
                   {liveScore.home} - {liveScore.away}
@@ -717,7 +717,7 @@ const HolographicStadium = ({
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-center"
+                className="text-center mb-4"
               >
                 <p className="text-4xl font-black text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
                   {matchResult.home} - {matchResult.away}
@@ -919,11 +919,9 @@ const FloatingText = ({ text, x, y }: { text: string; x: number; y: number }) =>
 // Smash to Boost Component - High-frequency interaction during match
 const SmashToBoost = ({
   onSmash,
-  fanEnergy,
   isMuted,
 }: {
   onSmash: () => void
-  fanEnergy: number
   isMuted: boolean
 }) => {
   const [particles, setParticles] = useState<Array<{ id: number; emoji: string; x: number; y: number }>>([])
@@ -1028,19 +1026,6 @@ const SmashToBoost = ({
   
   return (
     <div className="relative my-2">
-      {/* Fan Energy Counter */}
-      <div className="mb-2 text-center">
-        <p className="text-[10px] text-slate-400 mb-0.5">FAN ENERGY</p>
-        <motion.p
-          key={fanEnergy}
-          initial={{ scale: 1.2 }}
-          animate={{ scale: 1 }}
-          className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-orange-400 to-red-500"
-        >
-          {fanEnergy.toLocaleString()}
-        </motion.p>
-      </div>
-      
       {/* Smash Button */}
       <motion.button
         whileTap={{ scale: 0.9 }}
@@ -2058,8 +2043,6 @@ function App() {
   const [showGoalFlash, setShowGoalFlash] = useState(false)
   // Floating text animation for bet feedback
   const [floatingTexts, setFloatingTexts] = useState<Array<{ id: number; text: string; x: number; y: number }>>([])
-  // Fan Energy for Smash to Boost
-  const [fanEnergy, setFanEnergy] = useState(0)
   // Wallet icon animation state (used for claim animation)
   const [walletPulse, setWalletPulse] = useState(false)
 
@@ -2520,7 +2503,6 @@ function App() {
           setMatchScript([]) // Clear match script
           setLiveScore({ home: 0, away: 0 }) // Reset live score
           setShowGoalFlash(false) // Reset goal flash
-          setFanEnergy(0) // Reset fan energy
           return TOTAL_CYCLE
         }
 
@@ -3027,9 +3009,8 @@ function App() {
           <div className="flex-none">
             <SmashToBoost
               onSmash={() => {
-                setFanEnergy((prev) => prev + 1)
+                // Trigger animation and vibration only
               }}
-              fanEnergy={fanEnergy}
               isMuted={isMuted}
             />
           </div>
