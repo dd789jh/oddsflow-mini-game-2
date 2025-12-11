@@ -1,7 +1,42 @@
+/*
+ * ============================================
+ * SUPABASE DATABASE SETUP
+ * ============================================
+ * 
+ * Please run this SQL in your Supabase SQL Editor to create the users table:
+ * 
+ * CREATE TABLE users (
+ *   id BIGINT PRIMARY KEY,
+ *   username TEXT,
+ *   coins INTEGER DEFAULT 1000 NOT NULL,
+ *   is_vip BOOLEAN DEFAULT false NOT NULL,
+ *   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+ *   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+ * );
+ * 
+ * -- Optional: Create an index for faster lookups
+ * CREATE INDEX idx_users_id ON users(id);
+ * 
+ * -- Optional: Create a function to automatically update updated_at
+ * CREATE OR REPLACE FUNCTION update_updated_at_column()
+ * RETURNS TRIGGER AS $$
+ * BEGIN
+ *   NEW.updated_at = NOW();
+ *   RETURN NEW;
+ * END;
+ * $$ language 'plpgsql';
+ * 
+ * CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+ * FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+ * 
+ * ============================================
+ */
+
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import { Volume2, VolumeX, Info, Trophy } from 'lucide-react'
+import { supabase } from './supabaseClient'
 
 // Telegram WebApp TypeScript declaration
 declare global {
@@ -2002,6 +2037,12 @@ const RESULT_TIME = 5   // seconds - Phase 3: Result period
 const TOTAL_CYCLE = BETTING_TIME + LOCKED_TIME + RESULT_TIME // 50 seconds total
 
 function App() {
+  // User state (Supabase connected)
+  const [userId, setUserId] = useState<number | null>(null)
+  const [username, setUsername] = useState<string | null>(null)
+  const [isVip, setIsVip] = useState(false)
+  const [isUserLoaded, setIsUserLoaded] = useState(false)
+  
   const [timeLeft, setTimeLeft] = useState(TOTAL_CYCLE)
   const [gameState, setGameState] = useState<GameState>('BETTING')
   const [currentMatch, setCurrentMatch] = useState<Match>(generateRandomMatch())
@@ -2059,6 +2100,96 @@ function App() {
       window.Telegram.WebApp.setHeaderColor('#0f172a') // 使用你的背景色 slate-900
     }
   }, [])
+
+  // Supabase: Auto Login/Register User
+  useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        let telegramUserId: number | null = null
+        let telegramUsername: string | null = null
+
+        // Detect Telegram user
+        if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+          const tgUser = window.Telegram.WebApp.initDataUnsafe.user
+          telegramUserId = tgUser.id
+          telegramUsername = tgUser.username || `user_${telegramUserId}`
+        } else {
+          // Fallback for local development (non-Telegram environment)
+          telegramUserId = 999999999 // test_user_id
+          telegramUsername = 'test_user'
+          console.log('⚠️ Running in non-Telegram environment, using test user')
+        }
+
+        if (!telegramUserId) {
+          console.error('❌ No user ID found')
+          setIsUserLoaded(true)
+          return
+        }
+
+        setUserId(telegramUserId)
+        setUsername(telegramUsername)
+
+        // Query database for existing user
+        const { data: existingUser, error: queryError } = await supabase
+          .from('users')
+          .select('id, username, coins, is_vip')
+          .eq('id', telegramUserId)
+          .single()
+
+        if (queryError && queryError.code !== 'PGRST116') {
+          // PGRST116 = no rows returned, which is expected for new users
+          console.error('❌ Error querying user:', queryError)
+          setIsUserLoaded(true)
+          return
+        }
+
+        if (existingUser) {
+          // Existing user: load their data
+          console.log('✅ Existing user found:', existingUser)
+          setCoins(existingUser.coins || 1000)
+          setIsVip(existingUser.is_vip || false)
+        } else {
+          // New user: create record
+          console.log('🆕 Creating new user...')
+          const { data: newUser, error: insertError } = await supabase
+            .from('users')
+            .insert({
+              id: telegramUserId,
+              username: telegramUsername,
+              coins: 1000,
+              is_vip: false,
+            })
+            .select()
+            .single()
+
+          if (insertError) {
+            console.error('❌ Error creating user:', insertError)
+            // Fallback to default values
+            setCoins(1000)
+            setIsVip(false)
+          } else {
+            console.log('✅ New user created:', newUser)
+            setCoins(newUser.coins || 1000)
+            setIsVip(newUser.is_vip || false)
+          }
+        }
+
+        setIsUserLoaded(true)
+      } catch (error) {
+        console.error('❌ Unexpected error during user initialization:', error)
+        setIsUserLoaded(true)
+      }
+    }
+
+    initializeUser()
+  }, [])
+  
+  // Log user info when loaded (using variables to avoid unused warnings)
+  useEffect(() => {
+    if (isUserLoaded && userId && username) {
+      console.log(`👤 User loaded: ${username} (ID: ${userId}, VIP: ${isVip})`)
+    }
+  }, [isUserLoaded, userId, username, isVip])
 
   const bgmRef = useRef<HTMLAudioElement | null>(null)
   const clickRef = useRef<HTMLAudioElement | null>(null)
@@ -2406,8 +2537,8 @@ function App() {
           // Step 6: Process win/loss effects (after snapshot is set)
           if (bet.type && bet.amount > 0) {
             if (isWin) {
-              // WIN: Update coins
-              setCoins((c) => c + profit)
+              // WIN: Don't update coins here - wait for CLAIM button click
+              // Coins will be added when user clicks CLAIM button
               setBetResult('win')
               setShowWinModal(true)
               setShowBigWin(true)
@@ -2638,7 +2769,7 @@ function App() {
     setLang((prev) => (prev === 'en' ? 'zh' : 'en'))
   }
 
-  const handlePlaceBet = (type: BetType, event?: React.MouseEvent<HTMLButtonElement>) => {
+  const handlePlaceBet = async (type: BetType, event?: React.MouseEvent<HTMLButtonElement>) => {
     if (gameState !== 'BETTING') return
 
     const betAmount = 100
@@ -2668,8 +2799,37 @@ function App() {
       }, 2000)
     }
     
+    // Update local state immediately (optimistic update)
     setCoins((prev) => prev - betAmount)
     setUserBet({ type, amount: betAmount })
+    
+    // Sync to Supabase database
+    if (userId) {
+      try {
+        const { data: updatedUser, error } = await supabase
+          .from('users')
+          .update({ coins: coins - betAmount })
+          .eq('id', userId)
+          .select()
+          .single()
+
+        if (error) {
+          console.error('❌ Error updating coins in database:', error)
+          // Rollback local state on error
+          setCoins((prev) => prev + betAmount)
+        } else {
+          console.log('✅ Coins deducted in database:', updatedUser)
+          // Sync local state with database value (in case of race conditions)
+          if (updatedUser) {
+            setCoins(updatedUser.coins)
+          }
+        }
+      } catch (error) {
+        console.error('❌ Unexpected error updating coins:', error)
+        // Rollback local state on error
+        setCoins((prev) => prev + betAmount)
+      }
+    }
     
     // Randomly select intel type after successful bet
     const rand = Math.random()
@@ -2682,9 +2842,57 @@ function App() {
     }
   }
 
-  const handleInviteForRewards = () => {
-    setCoins((prev) => prev + 500)
+  const handleInviteForRewards = async () => {
+    const rewardAmount = 500
+    
+    // Update local state immediately (optimistic update)
+    setCoins((prev) => prev + rewardAmount)
     setShowReviveModal(false)
+    
+    // Sync to Supabase database
+    if (userId) {
+      try {
+        // First, get current coins from database to ensure accuracy
+        const { data: currentUser, error: fetchError } = await supabase
+          .from('users')
+          .select('coins')
+          .eq('id', userId)
+          .single()
+
+        if (fetchError) {
+          console.error('❌ Error fetching current coins:', fetchError)
+          // Rollback local state on error
+          setCoins((prev) => prev - rewardAmount)
+          return
+        }
+
+        const newCoins = (currentUser?.coins || 0) + rewardAmount
+
+        // Update database with new coins
+        const { data: updatedUser, error } = await supabase
+          .from('users')
+          .update({ coins: newCoins })
+          .eq('id', userId)
+          .select()
+          .single()
+
+        if (error) {
+          console.error('❌ Error updating coins in database:', error)
+          // Rollback local state on error
+          setCoins((prev) => prev - rewardAmount)
+        } else {
+          console.log('✅ Invite reward coins added to database:', updatedUser)
+          // Sync local state with database value (in case of race conditions)
+          if (updatedUser) {
+            setCoins(updatedUser.coins)
+          }
+        }
+      } catch (error) {
+        console.error('❌ Unexpected error adding invite reward:', error)
+        // Rollback local state on error
+        setCoins((prev) => prev - rewardAmount)
+      }
+    }
   }
 
   const formatTime = (seconds: number): string => {
@@ -3070,10 +3278,63 @@ function App() {
         onClose={handleResultModalClose}
         roundResult={roundResult}
         currentMatch={currentMatch}
-        onClaim={() => {
+        onClaim={async () => {
           // Trigger wallet icon animation
           setWalletPulse(true)
           setTimeout(() => setWalletPulse(false), 500)
+          
+          // Claim coins: Add to database and local state
+          if (roundResult && roundResult.isWin && roundResult.profit > 0) {
+            const profit = roundResult.profit
+            
+            // Update local state immediately (optimistic update)
+            setCoins((prev) => prev + profit)
+            
+            // Sync to Supabase database
+            if (userId) {
+              try {
+                // First, get current coins from database to ensure accuracy
+                const { data: currentUser, error: fetchError } = await supabase
+                  .from('users')
+                  .select('coins')
+                  .eq('id', userId)
+                  .single()
+
+                if (fetchError) {
+                  console.error('❌ Error fetching current coins:', fetchError)
+                  // Rollback local state on error
+                  setCoins((prev) => prev - profit)
+                  return
+                }
+
+                const newCoins = (currentUser?.coins || 0) + profit
+
+                // Update database with new coins
+                const { data: updatedUser, error } = await supabase
+                  .from('users')
+                  .update({ coins: newCoins })
+                  .eq('id', userId)
+                  .select()
+                  .single()
+
+                if (error) {
+                  console.error('❌ Error updating coins in database:', error)
+                  // Rollback local state on error
+                  setCoins((prev) => prev - profit)
+                } else {
+                  console.log('✅ Coins claimed in database:', updatedUser)
+                  // Sync local state with database value (in case of race conditions)
+                  if (updatedUser) {
+                    setCoins(updatedUser.coins)
+                  }
+                }
+              } catch (error) {
+                console.error('❌ Unexpected error claiming coins:', error)
+                // Rollback local state on error
+                setCoins((prev) => prev - profit)
+              }
+            }
+          }
         }}
       />
 
