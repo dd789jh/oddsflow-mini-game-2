@@ -2978,8 +2978,8 @@ function App() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="max-w-[120px] truncate text-[10px] font-semibold text-slate-200">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="max-w-[80px] min-w-0 truncate text-[10px] font-semibold text-slate-200">
               Hi, {firstName || '...'}
             </div>
             <motion.div
