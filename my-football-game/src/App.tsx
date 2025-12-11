@@ -1012,15 +1012,15 @@ const SmashToBoost = ({
   }
   
   return (
-    <div className="relative">
+    <div className="relative my-2">
       {/* Fan Energy Counter */}
-      <div className="mb-3 text-center">
-        <p className="text-xs text-slate-400 mb-1">FAN ENERGY</p>
+      <div className="mb-2 text-center">
+        <p className="text-[10px] text-slate-400 mb-0.5">FAN ENERGY</p>
         <motion.p
           key={fanEnergy}
           initial={{ scale: 1.2 }}
           animate={{ scale: 1 }}
-          className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-orange-400 to-red-500"
+          className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-orange-400 to-red-500"
         >
           {fanEnergy.toLocaleString()}
         </motion.p>
@@ -1030,20 +1030,20 @@ const SmashToBoost = ({
       <motion.button
         whileTap={{ scale: 0.9 }}
         onClick={handleSmash}
-        className="relative w-full h-32 rounded-full bg-gradient-to-br from-red-500 via-red-600 to-red-700 shadow-[0_0_40px_rgba(239,68,68,0.6)] border-4 border-red-400/50 active:scale-95 active:shadow-[0_0_30px_rgba(239,68,68,0.4)] transition-all"
+        className="relative w-full h-14 rounded-full bg-gradient-to-br from-red-500 via-red-600 to-red-700 shadow-[0_0_30px_rgba(239,68,68,0.6)] border-2 border-red-400/50 active:scale-95 active:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all"
       >
         <motion.div
           animate={{
             boxShadow: [
-              '0_0_40px_rgba(239,68,68,0.6)',
-              '0_0_60px_rgba(239,68,68,0.8)',
-              '0_0_40px_rgba(239,68,68,0.6)',
+              '0_0_30px_rgba(239,68,68,0.6)',
+              '0_0_40px_rgba(239,68,68,0.8)',
+              '0_0_30px_rgba(239,68,68,0.6)',
             ],
           }}
           transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
           className="absolute inset-0 rounded-full"
         />
-        <span className="relative z-10 text-4xl font-black text-white drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+        <span className="relative z-10 text-xl font-black text-white drop-shadow-[0_0_15px_rgba(0,0,0,0.8)]">
           🔥 SMASH!
         </span>
       </motion.button>
