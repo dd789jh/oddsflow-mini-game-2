@@ -2979,17 +2979,6 @@ function App() {
             </div>
           </div>
           <div className="flex items-center gap-3 min-w-0">
-            <div className="max-w-[80px] min-w-0 truncate text-[10px] font-semibold text-slate-200">
-              Hi, {firstName || '...'}
-            </div>
-            <motion.div
-              animate={walletPulse ? { scale: [1, 1.5, 1] } : {}}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-100 shadow-[0_0_15px_rgba(251,191,36,0.45)]"
-            >
-              <span className="text-sm">🪙</span>
-              <span className="text-white font-bold text-xs">{coins.toLocaleString()}</span>
-            </motion.div>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={toggleLang}
@@ -3008,6 +2997,21 @@ function App() {
                 <Volume2 className="h-4 w-4" />
               )}
             </motion.button>
+
+            {/* User info (name + coins) pinned to top-right */}
+            <div className="flex flex-col items-end gap-0.5 min-w-0">
+              <div className="max-w-[100px] min-w-0 truncate text-[10px] font-medium text-gray-300">
+                Hi, {firstName || '...'}
+              </div>
+              <motion.div
+                animate={walletPulse ? { scale: [1, 1.5, 1] } : {}}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-100 shadow-[0_0_15px_rgba(251,191,36,0.45)]"
+              >
+                <span className="text-sm">🪙</span>
+                <span className="text-white font-bold text-xs">{coins.toLocaleString()}</span>
+              </motion.div>
+            </div>
           </div>
         </div>
 
