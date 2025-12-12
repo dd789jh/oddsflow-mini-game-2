@@ -1105,7 +1105,7 @@ const SmashToBoost = ({
   }
   
   return (
-    <div className="relative my-2">
+    <div className="relative">
       {/* Smash Button */}
       <motion.button
         whileTap={{ scale: 0.9 }}
@@ -3071,7 +3071,7 @@ function App() {
   }
 
   return (
-    <div className={`relative h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 pt-4 pb-10 max-w-md mx-auto px-4 ${
+    <div className={`relative h-screen w-screen overflow-hidden flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 ${
       (timeLeft <= 3 && timeLeft > 0 && gameState === 'BETTING') || showGoalFlash
         ? 'animate-pulse border-4 border-red-500/50' 
         : ''
@@ -3093,7 +3093,7 @@ function App() {
         />
       </div>
 
-      <div className="relative mx-auto flex max-w-5xl flex-1 flex-col min-h-0 gap-1.5 py-1 overflow-hidden">
+      <div className="relative mx-auto flex w-full max-w-md flex-1 flex-col min-h-0 gap-1.5 px-4 pt-4 pb-3 overflow-hidden">
         {/* Top bar - Fixed Header */}
         <div className="flex-none flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 shadow-[0_0_20px_rgba(59,130,246,0.35)] backdrop-blur-lg">
           <div className="flex items-center gap-3">
@@ -3201,16 +3201,8 @@ function App() {
           </div>
         </div>
 
-        {/* Referral Invite Button */}
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={handleInviteShare}
-          disabled={!userId}
-          className="flex-none w-full rounded-xl bg-gradient-to-r from-emerald-400 via-green-500 to-emerald-600 px-3 py-2 text-sm font-black text-white shadow-[0_0_20px_rgba(34,197,94,0.45)] disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          邀请好友 (+500💰)
-        </motion.button>
-
+        {/* Main Content (takes remaining space, internal scroll only) */}
+        <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1.5">
         {/* Immersive Holographic Stadium with Layered Layout - Responsive Height */}
         <div className="shrink-0 h-48 sm:h-[25vh] md:h-64">
           <HolographicStadium
@@ -3400,13 +3392,8 @@ function App() {
             </motion.button>
           </div>
         ) : gameState === 'LOCKED' ? (
-          <div className="flex-none">
-            <SmashToBoost
-              onSmash={() => {
-                // Trigger animation and vibration only
-              }}
-              isMuted={isMuted}
-            />
+          <div className="flex-none rounded-xl border border-white/20 bg-white/5 p-3 text-center backdrop-blur-xl">
+            <p className="text-xs text-slate-300">Match in progress. SMASH is at the bottom 👇</p>
           </div>
         ) : (
           <div className="flex-none rounded-xl border border-white/20 bg-white/5 p-3 text-center backdrop-blur-xl">
@@ -3434,8 +3421,8 @@ function App() {
           </div>
         )}
 
-        {/* Scrollable Content Area - Takes remaining space */}
-        <div className="flex-1 min-h-0 flex flex-col gap-2 overflow-hidden">
+        {/* Scrollable Content Area */}
+        <div className="flex-none flex flex-col gap-2">
           {/* Live Activity Feed - Scrollable & Compact */}
           <div className="h-32 min-h-0 overflow-hidden">
             <ActivityFeed matchHistory={matchHistory} />
@@ -3444,6 +3431,32 @@ function App() {
           {/* Community Jackpot - Fixed at bottom */}
           <div className="flex-none">
             <CommunityJackpot />
+          </div>
+        </div>
+
+        </div>
+
+        {/* Footer (fixed to bottom): Invite + SMASH */}
+        <div className="flex-none pb-2 pt-1">
+          <div className="flex flex-col gap-1.5">
+            {/* Compact Invite button (doesn't push SMASH off-screen) */}
+            <motion.button
+              whileTap={{ scale: 0.99 }}
+              onClick={handleInviteShare}
+              disabled={!userId}
+              className="w-full rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-100 shadow-[0_0_12px_rgba(34,197,94,0.25)] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Invite Friends (+500💰)
+            </motion.button>
+
+            {gameState === 'LOCKED' && (
+              <SmashToBoost
+                onSmash={() => {
+                  // Trigger animation and vibration only
+                }}
+                isMuted={isMuted}
+              />
+            )}
           </div>
         </div>
       </div>
