@@ -55,7 +55,7 @@ export function TaskModal({
     setMessage(null)
     openTelegramLink(channelUrl)
     setHasClickedGo(true)
-    setCooldown(5)
+    setCooldown(3)
   }
 
   const handleClaim = async () => {
@@ -80,7 +80,7 @@ export function TaskModal({
 
       const already = user?.has_joined_channel === true
       if (already) {
-        setMessage('You have already claimed this reward!')
+        setMessage('You already claimed this!')
         return
       }
 
@@ -102,7 +102,10 @@ export function TaskModal({
 
       const nextCoins = typeof updated?.coins === 'string' ? Number(updated.coins) : (updated?.coins ?? newCoins)
       onCoinsUpdated(Number.isFinite(nextCoins) ? nextCoins : newCoins)
-      onRewardSuccess()
+      setMessage('Success! +1000 Coins Added')
+      setTimeout(() => {
+        onRewardSuccess()
+      }, 700)
     } catch (e) {
       console.error('❌ Unexpected error claiming join task reward:', e)
       setMessage('Unexpected error. Please try again.')
@@ -134,11 +137,11 @@ export function TaskModal({
             <div className="relative space-y-3">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🌐</span>
-                <p className="text-lg font-black text-white">Join our Community</p>
+                <p className="text-lg font-black text-white">Join Oddsflow VIP</p>
               </div>
 
               <p className="text-xs text-slate-300 leading-relaxed">
-                Subscribe to Oddsflow VIP channel to get exclusive insights and 1000 coins!
+                Get exclusive betting signals and 1000 FREE coins!
               </p>
 
               {message && (
@@ -153,7 +156,7 @@ export function TaskModal({
                   onClick={handleGoToChannel}
                   className="flex-1 rounded-lg bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-3 py-2 text-sm font-bold text-white shadow-[0_0_18px_rgba(59,130,246,0.35)]"
                 >
-                  Go to Channel ✈️
+                  👉 Go to Channel
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: canClaim ? 0.96 : 1 }}

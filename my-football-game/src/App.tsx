@@ -3308,9 +3308,9 @@ function App() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowJoinTaskModal(true)}
-            className="w-full rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 px-3 py-2 text-sm font-black text-white shadow-[0_0_18px_rgba(251,191,36,0.45)]"
+            className="w-full rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 px-3 py-2 text-sm font-black text-white shadow-[0_0_18px_rgba(251,191,36,0.45)] animate-pulse"
           >
-            💰 +1000 Free Coins
+            💰 Join Channel (+1000)
           </motion.button>
 
         {/* Immersive Holographic Stadium with Layered Layout - Responsive Height */}
@@ -3665,7 +3665,7 @@ function App() {
       <TaskModal
         show={showJoinTaskModal}
         onClose={() => setShowJoinTaskModal(false)}
-        channelUrl="https://t.me/oddsflowvip"
+        channelUrl="https://t.me/Oddsflow_Channel"
         telegramId={userId}
         onCoinsUpdated={(next) => setCoins(next)}
         onRewardSuccess={handleJoinTaskSuccess}
