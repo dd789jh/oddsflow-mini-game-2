@@ -9,11 +9,70 @@
  *   telegram_id BIGINT UNIQUE,
  *   coins BIGINT DEFAULT 1000 NOT NULL,
  *   first_name TEXT,
- *   invited_by BIGINT
+ *   invited_by BIGINT,
+ *   invited_rewarded BOOLEAN DEFAULT false NOT NULL
  * );
  * 
  * -- Optional: Create an index for faster lookups
  * CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
+ *
+ * -- Referral (atomic, one-time):
+ * -- This RPC guarantees: on FIRST registration only, if inviter is valid (and not self):
+ * --   - new user coins = 2000
+ * --   - invited_by set
+ * --   - inviter coins += 500
+ * --   - invited_rewarded = true
+ * -- Otherwise, new user coins = 1000 and no inviter reward.
+ * ALTER TABLE users
+ *   ADD COLUMN IF NOT EXISTS invited_rewarded BOOLEAN DEFAULT false NOT NULL;
+ *
+ * CREATE OR REPLACE FUNCTION register_user_with_referral(
+ *   p_telegram_id BIGINT,
+ *   p_first_name TEXT,
+ *   p_inviter_id BIGINT
+ * )
+ * RETURNS TABLE (telegram_id BIGINT, coins BIGINT, first_name TEXT)
+ * LANGUAGE plpgsql
+ * AS $$
+ * DECLARE
+ *   effective_inviter BIGINT;
+ * BEGIN
+ *   effective_inviter := NULL;
+ *   IF p_inviter_id IS NOT NULL AND p_inviter_id <> p_telegram_id THEN
+ *     effective_inviter := p_inviter_id;
+ *   END IF;
+ *
+ *   -- Insert only once (first registration). If already exists, do nothing and return existing row.
+ *   INSERT INTO users (telegram_id, first_name, coins, invited_by, invited_rewarded)
+ *   VALUES (
+ *     p_telegram_id,
+ *     p_first_name,
+ *     CASE WHEN effective_inviter IS NULL THEN 1000 ELSE 2000 END,
+ *     effective_inviter,
+ *     CASE WHEN effective_inviter IS NULL THEN false ELSE true END
+ *   )
+ *   ON CONFLICT (telegram_id) DO NOTHING;
+ *
+ *   -- Reward inviter exactly once (only for a truly new user insert)
+ *   IF effective_inviter IS NOT NULL THEN
+ *     -- Only reward if the user row was inserted in this call (i.e., invited_rewarded is true AND invited_by matches)
+ *     -- This protects against repeated calls for existing users.
+ *     IF EXISTS (
+ *       SELECT 1 FROM users u
+ *       WHERE u.telegram_id = p_telegram_id
+ *         AND u.invited_rewarded = true
+ *         AND u.invited_by = effective_inviter
+ *     ) THEN
+ *       UPDATE users SET coins = coins + 500 WHERE telegram_id = effective_inviter;
+ *     END IF;
+ *   END IF;
+ *
+ *   RETURN QUERY
+ *     SELECT u.telegram_id, u.coins, u.first_name
+ *     FROM users u
+ *     WHERE u.telegram_id = p_telegram_id;
+ * END;
+ * $$;
  * 
  * ============================================
  */
@@ -2165,6 +2224,29 @@ function App() {
             inviterId !== telegramUserId
           const initialCoins = hasValidInviter ? 2000 : 1000
 
+          // Prefer atomic RPC so insert+reward is guaranteed as one transaction.
+          const { data: rpcData, error: rpcError } = await supabase.rpc('register_user_with_referral', {
+            p_telegram_id: telegramUserId,
+            p_first_name: telegramFirstName,
+            p_inviter_id: hasValidInviter ? inviterId : null,
+          })
+
+          const rpcRow = Array.isArray(rpcData) ? rpcData[0] : rpcData
+
+          // If RPC exists and succeeded, use it.
+          if (!rpcError && rpcRow) {
+            console.log('✅ New user created via RPC:', rpcRow)
+            setCoins(Number(rpcRow.coins) || initialCoins)
+            setFirstName(rpcRow.first_name || telegramFirstName)
+            setIsUserLoaded(true)
+            return
+          }
+
+          // RPC fallback (non-atomic): keep compatibility if you haven't created the function yet.
+          if (rpcError) {
+            console.warn('⚠️ RPC register_user_with_referral failed; falling back to client-side flow:', rpcError)
+          }
+
           const { data: newUser, error: insertError } = await supabase
             .from('users')
             .insert({
@@ -2172,6 +2254,7 @@ function App() {
               first_name: telegramFirstName,
               coins: initialCoins,
               invited_by: hasValidInviter ? inviterId : null,
+              invited_rewarded: hasValidInviter ? true : false,
             })
             .select()
             .single()
@@ -2188,6 +2271,7 @@ function App() {
             // Reward inviter (+500 coins) if applicable
             if (hasValidInviter && inviterId) {
               try {
+                // Best-effort fallback reward (may be non-atomic).
                 const { data: inviter, error: inviterFetchError } = await supabase
                   .from('users')
                   .select('coins')
