@@ -1295,14 +1295,11 @@ const AnalysisModal = ({
               </div>
 
               <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                <p className="text-xs text-slate-200 mb-1">
-                  Prediction for <span className="text-cyan-300 font-semibold">{teamHint}</span>
-                </p>
                 <p className="text-sm font-bold text-amber-200">
-                  Prediction: Total Goals &gt; 2.5
+                  🎯 OddsFlow Prediction: Total Goals Over 2.5 (85% Confidence). Recommended Bet: High Volatility.
                 </p>
-                <p className="text-xs text-slate-300 mt-1">
-                  Confidence: <span className="text-green-400 font-bold">85%</span>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Match hint: <span className="text-cyan-300 font-semibold">{teamHint}</span>
                 </p>
               </div>
 
@@ -1894,7 +1891,6 @@ const IntelBoard = ({
   }
   
   // AI_TEASER
-  const teaserTeam = currentMatch.home || 'Chelsea'
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -1909,12 +1905,12 @@ const IntelBoard = ({
       </div>
 
       {/* Clean teaser text (no garbled repeat) */}
-      <div className="rounded-lg border border-white/10 bg-black/40 p-3 mb-3">
-        <p className="text-xs text-slate-200/90 blur-[0.6px]">
-          AI Model detected a high-value opportunity for {teaserTeam}...
+      <div className="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3 shadow-[inset_0_0_30px_rgba(59,130,246,0.12)]">
+        <p className="text-xs text-slate-200">
+          🤖 AI Model detected a significant odds divergence for this match.
         </p>
         <p className="text-[10px] text-slate-400 mt-1">
-          Unlock to reveal the full market edge and confidence score.
+          High confidence signal available.
         </p>
       </div>
       
@@ -1930,7 +1926,7 @@ const IntelBoard = ({
         className="w-full rounded-lg border-2 border-blue-400/50 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 px-3 py-2 text-sm font-bold text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-1.5"
       >
         <span>🔓</span>
-        <span>{isAnalysisUnlocked ? 'View Analysis' : `Unlock Analysis (-${AI_ANALYSIS_COST} 💰)`}</span>
+        <span>{isAnalysisUnlocked ? 'View Analysis' : `Unlock Analysis (${AI_ANALYSIS_COST} 💰)`}</span>
       </motion.button>
     </motion.div>
   )
@@ -2900,7 +2896,7 @@ function App() {
   }
 
   const openVipChannel = () => {
-    const vipUrl = 'https://t.me/your_channel'
+    const vipUrl = 'https://t.me/你的频道链接'
     if (window.Telegram?.WebApp?.openTelegramLink) {
       window.Telegram.WebApp.openTelegramLink(vipUrl)
     } else {
@@ -3558,7 +3554,7 @@ function App() {
         show={showNotEnoughCoinsModal}
         onClose={() => setShowNotEnoughCoinsModal(false)}
         title="Not enough coins"
-        description="Not enough coins! Play to win more."
+        description="Not enough coins! Win more to unlock."
         actionLabel="OK"
         actionColor="blue"
       />
