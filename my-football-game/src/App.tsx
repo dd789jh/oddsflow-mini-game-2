@@ -83,6 +83,7 @@ import confetti from 'canvas-confetti'
 import { Volume2, VolumeX, Info, Trophy } from 'lucide-react'
 import { supabase } from './supabaseClient'
 import { LeaderboardModal } from './Leaderboard'
+import { TaskModal } from './TaskModal'
 
 // Telegram WebApp TypeScript declaration
 declare global {
@@ -2087,6 +2088,7 @@ function App() {
   const [showReviveModal, setShowReviveModal] = useState(false)
   const [showRulesModal, setShowRulesModal] = useState(false)
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false)
+  const [showJoinTaskModal, setShowJoinTaskModal] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [isMusicStarted, setIsMusicStarted] = useState(false)
   const [lang, setLang] = useState<Lang>('en')
@@ -2896,12 +2898,32 @@ function App() {
   }
 
   const openVipChannel = () => {
-    const vipUrl = 'https://t.me/你的频道链接'
+    const vipUrl = 'https://t.me/oddsflowvip'
     if (window.Telegram?.WebApp?.openTelegramLink) {
       window.Telegram.WebApp.openTelegramLink(vipUrl)
     } else {
       window.open(vipUrl, '_blank')
     }
+  }
+
+  const handleJoinTaskSuccess = () => {
+    // Play win sound + confetti
+    if (winRef.current && !isMuted) {
+      winRef.current.currentTime = 0
+      winRef.current.play().catch(() => {})
+    }
+
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: ['#FFD700', '#FFA500', '#34D399', '#60A5FA'],
+    })
+
+    setWalletPulse(true)
+    setTimeout(() => setWalletPulse(false), 500)
+
+    setShowJoinTaskModal(false)
   }
 
   const handleInviteShare = () => {
@@ -3282,6 +3304,15 @@ function App() {
 
         {/* Main Content (takes remaining space, internal scroll only) */}
         <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1.5">
+          {/* Join Channel Task Entry */}
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowJoinTaskModal(true)}
+            className="w-full rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 px-3 py-2 text-sm font-black text-white shadow-[0_0_18px_rgba(251,191,36,0.45)]"
+          >
+            💰 +1000 Free Coins
+          </motion.button>
+
         {/* Immersive Holographic Stadium with Layered Layout - Responsive Height */}
         <div className="shrink-0 h-48 sm:h-[25vh] md:h-64">
           <HolographicStadium
@@ -3629,6 +3660,15 @@ function App() {
         onClose={() => setShowAnalysisModal(false)}
         onJoinVip={openVipChannel}
         teamHint={currentMatch.home}
+      />
+
+      <TaskModal
+        show={showJoinTaskModal}
+        onClose={() => setShowJoinTaskModal(false)}
+        channelUrl="https://t.me/oddsflowvip"
+        telegramId={userId}
+        onCoinsUpdated={(next) => setCoins(next)}
+        onRewardSuccess={handleJoinTaskSuccess}
       />
 
       {userBet.type && (
