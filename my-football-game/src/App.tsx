@@ -454,8 +454,6 @@ const RulesModal = ({
   )
 }
 
-// LeaderboardModal moved to `src/Leaderboard.tsx`
-
 // Live Commentary Widget with Audio Triggers
 const LiveCommentary = ({ 
   text, 
@@ -1259,6 +1257,79 @@ const ResultAnalysisModal = ({
   )
 }
 
+// AI Analysis Modal (shown after paying / or when already unlocked this round)
+const AnalysisModal = ({
+  show,
+  onClose,
+  onJoinVip,
+  teamHint,
+}: {
+  show: boolean
+  onClose: () => void
+  onJoinVip: () => void
+  teamHint: string
+}) => {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.92, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.92, opacity: 0, y: 10 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+            className="relative w-[90%] max-w-sm rounded-xl border border-white/10 bg-slate-900/85 p-4 shadow-[0_0_30px_rgba(59,130,246,0.35)] backdrop-blur-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
+            <div className="relative space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🧠</span>
+                <p className="text-lg font-black text-white">AI Analysis</p>
+              </div>
+
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                <p className="text-xs text-slate-200 mb-1">
+                  Prediction for <span className="text-cyan-300 font-semibold">{teamHint}</span>
+                </p>
+                <p className="text-sm font-bold text-amber-200">
+                  Prediction: Total Goals &gt; 2.5
+                </p>
+                <p className="text-xs text-slate-300 mt-1">
+                  Confidence: <span className="text-green-400 font-bold">85%</span>
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={onJoinVip}
+                  className="flex-1 rounded-lg bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-3 py-2 text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+                >
+                  Join VIP Channel
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={onClose}
+                  className="flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20 transition"
+                >
+                  Close
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 // The Truth Modal (Community Values)
 const TruthModal = ({
   show,
@@ -1665,13 +1736,15 @@ const IntelBoard = ({
   userBet,
   currentMatch,
   onInviteClick,
-  onChannelClick,
+  isAnalysisUnlocked,
+  onUnlockAnalysis,
 }: {
   type: 'SENTIMENT' | 'GREED' | 'AI_TEASER'
   userBet: { type: BetType | null; amount: number }
   currentMatch: Match
   onInviteClick: () => void
-  onChannelClick: () => void
+  isAnalysisUnlocked?: boolean
+  onUnlockAnalysis?: () => void
 }) => {
   if (type === 'SENTIMENT') {
     // Generate random market volume percentages
@@ -1821,6 +1894,7 @@ const IntelBoard = ({
   }
   
   // AI_TEASER
+  const teaserTeam = currentMatch.home || 'Chelsea'
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -1833,28 +1907,30 @@ const IntelBoard = ({
         <span className="text-lg">🤖</span>
         <p className="text-sm font-bold text-blue-300">AI MODEL ALERT</p>
       </div>
-      
-      <div className="rounded-lg border border-white/10 bg-black/40 p-3 mb-3 font-mono text-[10px] text-green-400 h-auto min-h-[3rem] whitespace-normal break-words">
-        <motion.div
-          animate={{ x: [0, -100, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-          className="whitespace-normal break-words"
-        >
-          {'> AI Model detected a significant odds divergence...'.repeat(3)}
-        </motion.div>
+
+      {/* Clean teaser text (no garbled repeat) */}
+      <div className="rounded-lg border border-white/10 bg-black/40 p-3 mb-3">
+        <p className="text-xs text-slate-200/90 blur-[0.6px]">
+          AI Model detected a high-value opportunity for {teaserTeam}...
+        </p>
+        <p className="text-[10px] text-slate-400 mt-1">
+          Unlock to reveal the full market edge and confidence score.
+        </p>
       </div>
-      
-      <p className="text-xs text-slate-300 mb-3">
-        AI Model detected a significant odds divergence. Unlock full analysis in our channel.
-      </p>
       
       <motion.button
         whileTap={{ scale: 0.96 }}
-        onClick={onChannelClick}
+        onClick={() => {
+          if (isAnalysisUnlocked) {
+            onUnlockAnalysis?.()
+            return
+          }
+          onUnlockAnalysis?.()
+        }}
         className="w-full rounded-lg border-2 border-blue-400/50 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 px-3 py-2 text-sm font-bold text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-1.5"
       >
         <span>🔓</span>
-        <span>Unlock Analysis in Channel</span>
+        <span>{isAnalysisUnlocked ? 'View Analysis' : `Unlock Analysis (-${AI_ANALYSIS_COST} 💰)`}</span>
       </motion.button>
     </motion.div>
   )
@@ -1996,6 +2072,9 @@ const LOCKED_TIME = 25  // seconds - Phase 2: Match period (script playback)
 const RESULT_TIME = 5   // seconds - Phase 3: Result period
 const TOTAL_CYCLE = BETTING_TIME + LOCKED_TIME + RESULT_TIME // total cycle length
 
+// Economy constants
+const AI_ANALYSIS_COST = 500
+
 function App() {
   // User state (Supabase connected)
   const [userId, setUserId] = useState<number | null>(null)
@@ -2037,6 +2116,10 @@ function App() {
   } | null>(null)
   // Intel Board Type - random intelligence board shown after betting
   const [intelType, setIntelType] = useState<'SENTIMENT' | 'GREED' | 'AI_TEASER' | null>(null)
+  // AI Analysis unlock (per round)
+  const [isAnalysisUnlocked, setIsAnalysisUnlocked] = useState(false)
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false)
+  const [showNotEnoughCoinsModal, setShowNotEnoughCoinsModal] = useState(false)
   // Match Script Engine - timeline events for match period
   const [matchScript, setMatchScript] = useState<Array<{ time: number; type: 'goal' | 'whistle_start' | 'whistle_end'; team: 'home' | 'away' | null }>>([])
   const [liveScore, setLiveScore] = useState<{ home: number; away: number }>({ home: 0, away: 0 })
@@ -2676,6 +2759,8 @@ function App() {
           setShowBigWin(false)
           setRoundResult(null) // Clear result snapshot
           setIntelType(null) // Reset intel board
+          setIsAnalysisUnlocked(false) // Reset AI analysis unlock per round
+          setShowAnalysisModal(false)
           setMatchScript([]) // Clear match script
           setLiveScore({ home: 0, away: 0 }) // Reset live score
           setShowGoalFlash(false) // Reset goal flash
@@ -2814,6 +2899,15 @@ function App() {
     setLang((prev) => (prev === 'en' ? 'zh' : 'en'))
   }
 
+  const openVipChannel = () => {
+    const vipUrl = 'https://t.me/your_channel'
+    if (window.Telegram?.WebApp?.openTelegramLink) {
+      window.Telegram.WebApp.openTelegramLink(vipUrl)
+    } else {
+      window.open(vipUrl, '_blank')
+    }
+  }
+
   const handleInviteShare = () => {
     if (!userId) return
 
@@ -2830,6 +2924,65 @@ function App() {
       window.Telegram.WebApp.openTelegramLink(shareUrl)
     } else {
       window.open(shareUrl, '_blank')
+    }
+  }
+
+  const handleUnlockAnalysis = async () => {
+    // If already unlocked this round, just view it
+    if (isAnalysisUnlocked) {
+      setShowAnalysisModal(true)
+      return
+    }
+
+    // Quick local check
+    if (coins < AI_ANALYSIS_COST) {
+      setShowNotEnoughCoinsModal(true)
+      return
+    }
+
+    if (!userId) return
+
+    try {
+      // Check latest coins from DB for safety (avoid multi-session desync)
+      const { data: currentUser, error: fetchError } = await supabase
+        .from('users')
+        .select('coins')
+        .eq('telegram_id', userId)
+        .single()
+
+      if (fetchError) {
+        console.error('❌ Error fetching coins for analysis unlock:', fetchError)
+        return
+      }
+
+      const dbCoins = typeof currentUser?.coins === 'string' ? Number(currentUser.coins) : (currentUser?.coins ?? 0)
+      if (!Number.isFinite(dbCoins) || dbCoins < AI_ANALYSIS_COST) {
+        setShowNotEnoughCoinsModal(true)
+        return
+      }
+
+      const newCoins = dbCoins - AI_ANALYSIS_COST
+
+      const { data: updatedUser, error: updateError } = await supabase
+        .from('users')
+        .update({ coins: newCoins })
+        .eq('telegram_id', userId)
+        .select('coins')
+        .single()
+
+      if (updateError) {
+        console.error('❌ Error deducting coins for analysis unlock:', updateError)
+        return
+      }
+
+      // Sync local wallet and unlock state
+      const nextCoins =
+        typeof updatedUser?.coins === 'string' ? Number(updatedUser.coins) : (updatedUser?.coins ?? newCoins)
+      setCoins(Number.isFinite(nextCoins) ? nextCoins : newCoins)
+      setIsAnalysisUnlocked(true)
+      setShowAnalysisModal(true)
+    } catch (e) {
+      console.error('❌ Unexpected error unlocking analysis:', e)
     }
   }
 
@@ -3343,9 +3496,8 @@ function App() {
                 onInviteClick={() => {
                   setShowShareModal(true)
                 }}
-                onChannelClick={() => {
-                  window.open('https://t.me/your_channel', '_blank')
-                }}
+                isAnalysisUnlocked={isAnalysisUnlocked}
+                onUnlockAnalysis={handleUnlockAnalysis}
               />
             </AnimatePresence>
           </div>
@@ -3400,6 +3552,15 @@ function App() {
         description="Invite 1 Friend = +500 Coins 🪙"
         actionLabel="Invite & Earn"
         actionColor="green"
+      />
+
+      <Modal
+        show={showNotEnoughCoinsModal}
+        onClose={() => setShowNotEnoughCoinsModal(false)}
+        title="Not enough coins"
+        description="Not enough coins! Play to win more."
+        actionLabel="OK"
+        actionColor="blue"
       />
 
       <ResultAnalysisModal
@@ -3467,6 +3628,13 @@ function App() {
         }}
       />
 
+      <AnalysisModal
+        show={showAnalysisModal}
+        onClose={() => setShowAnalysisModal(false)}
+        onJoinVip={openVipChannel}
+        teamHint={currentMatch.home}
+      />
+
       {userBet.type && (
         <ShareSlipModal
           show={showShareModal}
@@ -3507,9 +3675,12 @@ function App() {
         show={showLeaderboardModal}
         onClose={() => setShowLeaderboardModal(false)}
         t={t}
-        currentTelegramId={userId}
-        currentCoins={coins}
-        currentFirstName={firstName}
+        currentUser={{
+          telegramId: userId,
+          coins,
+          firstName,
+          username: null,
+        }}
       />
 
       {/* BIG WIN! Celebration */}
