@@ -82,6 +82,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import { Volume2, VolumeX, Info, Trophy } from 'lucide-react'
 import { supabase } from './supabaseClient'
+import { LeaderboardModal } from './Leaderboard'
 
 // Telegram WebApp TypeScript declaration
 declare global {
@@ -453,156 +454,7 @@ const RulesModal = ({
   )
 }
 
-const LeaderboardModal = ({
-  show,
-  onClose,
-  t,
-}: {
-  show: boolean
-  onClose: () => void
-  t: typeof translations.en | typeof translations.zh
-}) => {
-  const [leaderboardData, setLeaderboardData] = useState<
-    Array<{
-      telegram_id?: number | null
-      coins?: number | string | null
-      first_name?: string | null
-      // Optional column: may or may not exist in your DB, so we treat it as unknown.
-      username?: unknown
-    }>
-  >([])
-
-  useEffect(() => {
-    if (!show) return
-    let cancelled = false
-
-    const loadLeaderboard = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('*')
-          .order('coins', { ascending: false })
-          .limit(7)
-
-        if (error) {
-          console.error('❌ Failed to load leaderboard:', error)
-          return
-        }
-
-        if (!cancelled) {
-          setLeaderboardData(data || [])
-        }
-      } catch (e) {
-        console.error('❌ Unexpected error loading leaderboard:', e)
-      }
-    }
-
-    loadLeaderboard()
-    return () => {
-      cancelled = true
-    }
-  }, [show])
-
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    if (show) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [show])
-
-  return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-            className="relative w-[90%] max-w-sm rounded-xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_0_30px_rgba(59,130,246,0.4)] backdrop-blur-2xl max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-white/10 via-transparent to-blue-500/20 blur-xl" />
-            <div className="relative space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 shadow-[0_0_25px_rgba(251,191,36,0.7)]" />
-                <p className="text-xl font-bold text-white">{t.top_winners}</p>
-              </div>
-              <div className="space-y-2">
-                {leaderboardData.map((row, idx) => {
-                  const rank = idx + 1
-                  const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : ''
-                  const color =
-                    rank === 1
-                      ? 'from-yellow-400 to-amber-500'
-                      : rank === 2
-                        ? 'from-slate-300 to-slate-400'
-                        : rank === 3
-                          ? 'from-amber-600 to-amber-700'
-                          : ''
-
-                  const rawUsername = (row as any)?.username
-                  const username =
-                    typeof rawUsername === 'string' ? rawUsername.trim().replace(/^@/, '') : ''
-                  const displayName =
-                    username
-                      ? `@${username}`
-                      : row.first_name && row.first_name.trim()
-                        ? row.first_name.trim()
-                        : 'Anonymous'
-
-                  const coinsNum =
-                    typeof row.coins === 'number'
-                      ? row.coins
-                      : typeof row.coins === 'string'
-                        ? Number(row.coins)
-                        : 0
-
-                  return (
-                  <div
-                    key={row.telegram_id ?? idx}
-                    className={`flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3 ${
-                      rank <= 3
-                        ? `bg-gradient-to-r ${color} text-white shadow-[0_0_20px_rgba(251,191,36,0.4)]`
-                        : 'text-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{medal}</span>
-                      <span className="text-sm font-bold">{displayName}</span>
-                    </div>
-                    <div className="text-sm font-semibold">
-                      {Number.isFinite(coinsNum) ? coinsNum.toLocaleString() : '0'} {t.coins}
-                    </div>
-                  </div>
-                  )
-                })}
-              </div>
-              <motion.button
-                whileTap={{ scale: 0.96 }}
-                onClick={onClose}
-                className="w-full rounded-xl bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 px-3 py-2 text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]"
-              >
-                {t.got_it}
-              </motion.button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  )
-}
+// LeaderboardModal moved to `src/Leaderboard.tsx`
 
 // Live Commentary Widget with Audio Triggers
 const LiveCommentary = ({ 
@@ -3655,6 +3507,9 @@ function App() {
         show={showLeaderboardModal}
         onClose={() => setShowLeaderboardModal(false)}
         t={t}
+        currentTelegramId={userId}
+        currentCoins={coins}
+        currentFirstName={firstName}
       />
 
       {/* BIG WIN! Celebration */}
