@@ -462,13 +462,46 @@ const LeaderboardModal = ({
   onClose: () => void
   t: typeof translations.en | typeof translations.zh
 }) => {
-  const leaders = [
-    { rank: 1, name: 'Alex_Crypto', wins: 12, medal: '🥇', color: 'from-yellow-400 to-amber-500' },
-    { rank: 2, name: 'BetKing99', wins: 10, medal: '🥈', color: 'from-slate-300 to-slate-400' },
-    { rank: 3, name: 'Sarah_J', wins: 8, medal: '🥉', color: 'from-amber-600 to-amber-700' },
-    { rank: 4, name: 'User_888', wins: 5, medal: '', color: '' },
-    { rank: 5, name: 'Tom.eth', wins: 4, medal: '', color: '' },
-  ]
+  const [leaderboardData, setLeaderboardData] = useState<
+    Array<{
+      telegram_id?: number | null
+      coins?: number | string | null
+      first_name?: string | null
+      // Optional column: may or may not exist in your DB, so we treat it as unknown.
+      username?: unknown
+    }>
+  >([])
+
+  useEffect(() => {
+    if (!show) return
+    let cancelled = false
+
+    const loadLeaderboard = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .order('coins', { ascending: false })
+          .limit(7)
+
+        if (error) {
+          console.error('❌ Failed to load leaderboard:', error)
+          return
+        }
+
+        if (!cancelled) {
+          setLeaderboardData(data || [])
+        }
+      } catch (e) {
+        console.error('❌ Unexpected error loading leaderboard:', e)
+      }
+    }
+
+    loadLeaderboard()
+    return () => {
+      cancelled = true
+    }
+  }, [show])
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -507,24 +540,54 @@ const LeaderboardModal = ({
                 <p className="text-xl font-bold text-white">{t.top_winners}</p>
               </div>
               <div className="space-y-2">
-                {leaders.map((leader) => (
+                {leaderboardData.map((row, idx) => {
+                  const rank = idx + 1
+                  const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : ''
+                  const color =
+                    rank === 1
+                      ? 'from-yellow-400 to-amber-500'
+                      : rank === 2
+                        ? 'from-slate-300 to-slate-400'
+                        : rank === 3
+                          ? 'from-amber-600 to-amber-700'
+                          : ''
+
+                  const rawUsername = (row as any)?.username
+                  const username =
+                    typeof rawUsername === 'string' ? rawUsername.trim().replace(/^@/, '') : ''
+                  const displayName =
+                    username
+                      ? `@${username}`
+                      : row.first_name && row.first_name.trim()
+                        ? row.first_name.trim()
+                        : 'Anonymous'
+
+                  const coinsNum =
+                    typeof row.coins === 'number'
+                      ? row.coins
+                      : typeof row.coins === 'string'
+                        ? Number(row.coins)
+                        : 0
+
+                  return (
                   <div
-                    key={leader.rank}
+                    key={row.telegram_id ?? idx}
                     className={`flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3 ${
-                      leader.rank <= 3
-                        ? `bg-gradient-to-r ${leader.color} text-white shadow-[0_0_20px_rgba(251,191,36,0.4)]`
+                      rank <= 3
+                        ? `bg-gradient-to-r ${color} text-white shadow-[0_0_20px_rgba(251,191,36,0.4)]`
                         : 'text-slate-300'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{leader.medal}</span>
-                      <span className="text-sm font-bold">{leader.name}</span>
+                      <span className="text-lg">{medal}</span>
+                      <span className="text-sm font-bold">{displayName}</span>
                     </div>
                     <div className="text-sm font-semibold">
-                      {leader.wins} {t.wins}
+                      {Number.isFinite(coinsNum) ? coinsNum.toLocaleString() : '0'} {t.coins}
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
               <motion.button
                 whileTap={{ scale: 0.96 }}
@@ -2076,10 +2139,10 @@ const generateRandomResult = (match: Match): { home: number; away: number } => {
 }
 
 // Game cycle constants
-const BETTING_TIME = 20 // seconds - Phase 1: Betting period
+const BETTING_TIME = 25 // seconds - Phase 1: Betting period
 const LOCKED_TIME = 25  // seconds - Phase 2: Match period (script playback)
 const RESULT_TIME = 5   // seconds - Phase 3: Result period
-const TOTAL_CYCLE = BETTING_TIME + LOCKED_TIME + RESULT_TIME // 50 seconds total
+const TOTAL_CYCLE = BETTING_TIME + LOCKED_TIME + RESULT_TIME // total cycle length
 
 function App() {
   // User state (Supabase connected)
@@ -2566,14 +2629,16 @@ function App() {
     return events
   }, [])
 
-  // Game loop engine - 50 second cycle (20s betting -> 25s locked -> 5s result)
+  // Game loop engine - cycle (BETTING_TIME betting -> LOCKED_TIME locked -> RESULT_TIME result)
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeLeft((prevTime) => {
         const newTime = prevTime - 1
 
         // Last 3 seconds of betting phase - red flash + vibration
-        if (newTime <= 3 && newTime > 0 && gameState === 'BETTING') {
+        // (Betting phase is BETTING_TIME seconds; global timeLeft includes locked+result too.)
+        const bettingLeft = newTime - (LOCKED_TIME + RESULT_TIME)
+        if (bettingLeft <= 3 && bettingLeft > 0 && gameState === 'BETTING') {
           // Vibration feedback
           if (navigator.vibrate) {
             navigator.vibrate(200)
@@ -2585,7 +2650,7 @@ function App() {
           }
         }
 
-        // Transition to LOCKED at end of betting phase (20 seconds)
+        // Transition to LOCKED at end of betting phase (BETTING_TIME seconds)
         if (newTime === LOCKED_TIME + RESULT_TIME) {
           // Generate final result FIRST
           const match = currentMatchRef.current
@@ -3070,6 +3135,19 @@ function App() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
+  // Phase-based countdown (so BETTING window shows 25s, not the full cycle)
+  const getPhaseDuration = () => {
+    if (gameState === 'BETTING') return BETTING_TIME
+    if (gameState === 'LOCKED') return LOCKED_TIME
+    return RESULT_TIME
+  }
+
+  const getPhaseTimeLeft = () => {
+    if (gameState === 'BETTING') return Math.max(0, timeLeft - (LOCKED_TIME + RESULT_TIME))
+    if (gameState === 'LOCKED') return Math.max(0, timeLeft - RESULT_TIME)
+    return Math.max(0, timeLeft)
+  }
+
   return (
     <div className={`relative h-screen w-screen overflow-hidden flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 ${
       (timeLeft <= 3 && timeLeft > 0 && gameState === 'BETTING') || showGoalFlash
@@ -3182,7 +3260,7 @@ function App() {
               gameState === 'LOCKED' ? 'text-red-400' : 
               'text-amber-400'
             }`}>
-              {formatTime(timeLeft)}
+              {formatTime(getPhaseTimeLeft())}
             </span>
           </div>
           <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
@@ -3195,7 +3273,7 @@ function App() {
                   : 'bg-gradient-to-r from-amber-400 to-yellow-500'
               }`}
               initial={{ width: '100%' }}
-              animate={{ width: `${(timeLeft / TOTAL_CYCLE) * 100}%` }}
+              animate={{ width: `${(getPhaseTimeLeft() / getPhaseDuration()) * 100}%` }}
               transition={{ duration: 1, ease: 'linear' }}
             />
           </div>
